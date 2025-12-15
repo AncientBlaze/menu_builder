@@ -1,9 +1,10 @@
 import { useMenuEditor } from "@/context/MenuEditorContext";
-
 import clsx from "clsx";
 
 export function MenuPreview() {
   const { menu } = useMenuEditor();
+
+  const isTwoColumn = menu.theme.layout === "two-column";
 
   const themeClasses = {
     light: "bg-white text-black",
@@ -26,8 +27,8 @@ export function MenuPreview() {
           menu.theme.fontFamily === "serif"
             ? "Georgia, serif"
             : menu.theme.fontFamily === "sans"
-              ? "Inter, sans-serif"
-              : "monospace",
+            ? "Inter, sans-serif"
+            : "monospace",
       }}
     >
       {/* Header */}
@@ -47,15 +48,25 @@ export function MenuPreview() {
         )}
       </header>
 
-      {/* Sections */}
-      <div className="space-y-8">
+      {/* Sections container */}
+      <div
+        className={clsx(
+          "gap-10",
+          isTwoColumn ? "columns-2" : "columns-1"
+        )}
+        style={{
+          columnGap: "2.5rem",
+        }}
+      >
         {menu.sections.map((section) => (
-          <section key={section.id}>
+          <section
+            key={section.id}
+            className="mb-8 break-inside-avoid"
+          >
             <h2
               className="text-xl font-semibold border-b pb-1 mb-4"
               style={{
-                pageBreakInside: "avoid",
-                borderColor: menu.theme.accentColor
+                borderColor: menu.theme.accentColor,
               }}
             >
               {section.title}
@@ -76,12 +87,12 @@ export function MenuPreview() {
                         <span
                           className="inline-block w-2 h-2 bg-green-600 rounded-full"
                           aria-label="Vegetarian"
-                        ></span>
+                        />
                       ) : (
                         <span
                           className="inline-block w-2 h-2 bg-red-600 rounded-full"
                           aria-label="Non-vegetarian"
-                        ></span>
+                        />
                       )}
                     </div>
 

@@ -7,11 +7,38 @@ type Props = {
 };
 
 export function MenuItemRow({ sectionId, item }: Props) {
-  const { updateItem, removeItem } =
-    useMenuEditor();
+  const {
+    menu,
+    updateItem,
+    removeItem,
+    reorderItems,
+  } = useMenuEditor();
+
+  const section = menu.sections.find(
+    (s) => s.id === sectionId
+  );
+
+  if (!section) return null;
+
+  const index = section.items.findIndex(
+    (i) => i.id === item.id
+  );
+
+  const moveUp = () => {
+    if (index > 0) {
+      reorderItems(sectionId, index, index - 1);
+    }
+  };
+
+  const moveDown = () => {
+    if (index < section.items.length - 1) {
+      reorderItems(sectionId, index, index + 1);
+    }
+  };
 
   return (
     <div className="border rounded p-2 space-y-1">
+      {/* Header */}
       <div className="flex items-center gap-2">
         <input
           className="flex-1 border-b text-sm"
@@ -23,6 +50,29 @@ export function MenuItemRow({ sectionId, item }: Props) {
           }
         />
 
+        {/* Reorder buttons */}
+        <div className="flex gap-1">
+          <button
+            onClick={moveUp}
+            disabled={index === 0}
+            className="text-xs px-1 disabled:opacity-30"
+            title="Move up"
+          >
+            ▲
+          </button>
+          <button
+            onClick={moveDown}
+            disabled={
+              index === section.items.length - 1
+            }
+            className="text-xs px-1 disabled:opacity-30"
+            title="Move down"
+          >
+            ▼
+          </button>
+        </div>
+
+        {/* Delete */}
         <button
           onClick={() =>
             removeItem(sectionId, item.id)
@@ -34,7 +84,8 @@ export function MenuItemRow({ sectionId, item }: Props) {
         </button>
       </div>
 
-      <div className="flex gap-2">
+      {/* Price & Veg */}
+      <div className="flex gap-2 items-center">
         <input
           type="number"
           className="w-20 border rounded px-2 text-sm"
@@ -60,6 +111,7 @@ export function MenuItemRow({ sectionId, item }: Props) {
         </label>
       </div>
 
+      {/* Description */}
       <textarea
         className="w-full border rounded text-xs p-1"
         placeholder="Description"

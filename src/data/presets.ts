@@ -11,7 +11,7 @@ export const PRESETS: MenuPreset[] = [
         restaurantName: "Old Town Café",
         tagline: "Since 1984",
         address: "Market Street",
-        currency: "INR",
+        currency: "$",
       },
       theme: {
         theme: "vintage",
@@ -75,7 +75,7 @@ export const PRESETS: MenuPreset[] = [
         restaurantName: "La Maison",
         tagline: "Fine Dining Experience",
         address: "Park Street",
-        currency: "INR",
+        currency: "₨",
       },
       theme: {
         theme: "elegant",
@@ -139,7 +139,7 @@ export const PRESETS: MenuPreset[] = [
         restaurantName: "Spice Junction",
         tagline: "Hot · Fast · Desi",
         address: "Food Court",
-        currency: "INR",
+        currency: "₨",
       },
       theme: {
         theme: "bold",
@@ -203,7 +203,7 @@ export const PRESETS: MenuPreset[] = [
         restaurantName: "Bean & Brew",
         tagline: "Freshly Brewed Everyday",
         address: "High Street",
-        currency: "INR",
+        currency: "₨",
       },
       theme: {
         theme: "light",

@@ -6,6 +6,7 @@ import {
 import { useMenuDocument } from "@/hooks/useMenuDocument";
 import { MenuDocument } from "@/types/menu";
 import { nanoid } from "nanoid";
+import { arrayMove } from "@/utils/reorder";
 
 type MenuEditorContextValue = {
   menu: MenuDocument;
@@ -27,6 +28,12 @@ type MenuEditorContextValue = {
   ) => void;
   removeSection: (sectionId: string) => void;
   removeItem: (sectionId: string, itemId: string) => void;
+  reorderSections: (from: number, to: number) => void;
+  reorderItems: (
+    sectionId: string,
+    from: number,
+    to: number
+  ) => void;
 };
 
 const MenuEditorContext =
@@ -110,6 +117,30 @@ export function MenuEditorProvider({
     }));
   };
 
+  const reorderSections = (from: number, to: number) => {
+    setMenu((m) => ({
+      ...m,
+      sections: arrayMove(m.sections, from, to),
+    }));
+  };
+
+  const reorderItems = (
+    sectionId: string,
+    from: number,
+    to: number
+  ) => {
+    setMenu((m) => ({
+      ...m,
+      sections: m.sections.map((s) =>
+        s.id === sectionId
+          ? {
+            ...s,
+            items: arrayMove(s.items, from, to),
+          }
+          : s
+      ),
+    }));
+  };
 
   const value: MenuEditorContextValue = {
     menu,
@@ -120,6 +151,8 @@ export function MenuEditorProvider({
     updateItem,
     removeSection,
     removeItem,
+    reorderItems,
+    reorderSections
   };
 
   return (

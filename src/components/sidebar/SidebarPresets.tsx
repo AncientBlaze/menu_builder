@@ -4,8 +4,6 @@ import { useMenuEditor } from "@/context/MenuEditorContext";
 export function SidebarPresets() {
   const { setMenu } = useMenuEditor();
 
-  console.log("PRESETS:", PRESETS);
-
   return (
     <aside className="w-55 bg-slate-900 text-white p-3">
       <h2 className="text-sm font-semibold mb-3 opacity-80">

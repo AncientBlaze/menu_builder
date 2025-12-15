@@ -1,4 +1,4 @@
-export type CurrencyCode = "INR" | "USD" | "EUR";
+export type CurrencyCode = "₨" | "$" | "€";
 
 export type ThemeVariant =
   | "light"
