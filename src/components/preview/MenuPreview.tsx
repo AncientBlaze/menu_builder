@@ -8,7 +8,7 @@ export function MenuPreview() {
 
   const themeClasses = {
     light: "bg-white text-black",
-    dark: "bg-neutral-900 text-white",
+    dark: "bg-[black] text-white",
     elegant: "bg-[#faf7f2] text-[#2e2a26]",
     vintage: "bg-[#f4efe8] text-[#3b332c]",
     bold: "bg-black text-white",
@@ -27,8 +27,8 @@ export function MenuPreview() {
           menu.theme.fontFamily === "serif"
             ? "Georgia, serif"
             : menu.theme.fontFamily === "sans"
-            ? "Inter, sans-serif"
-            : "monospace",
+              ? "Inter, sans-serif"
+              : "monospace",
       }}
     >
       {/* Header */}
@@ -52,16 +52,16 @@ export function MenuPreview() {
       <div
         className={clsx(
           "gap-10",
-          isTwoColumn ? "columns-2" : "columns-1"
+          isTwoColumn
+            ? "grid grid-cols-2 items-start"
+            : "flex flex-col"
         )}
-        style={{
-          columnGap: "2.5rem",
-        }}
       >
+
         {menu.sections.map((section) => (
           <section
             key={section.id}
-            className="mb-8 break-inside-avoid"
+            className="mb-8"
           >
             <h2
               className="text-xl font-semibold border-b pb-1 mb-4"

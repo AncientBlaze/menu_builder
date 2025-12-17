@@ -1,64 +1,59 @@
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 
-export async function exportMenuPDF(
-  element: HTMLElement,
-  fileName = "menu.pdf"
-): Promise<void> {
-  // Higher scale = sharper PDF
-  const scale = 2;
-
+/**
+ * Generate a PDF Blob (used for QR, preview, upload)
+ */
+export async function generateMenuPdfBlob(
+  element: HTMLElement
+): Promise<Blob> {
   const canvas = await html2canvas(element, {
-    scale,
+    scale: 1,
     useCORS: true,
     backgroundColor: "#ffffff",
   });
 
-  const imgData = canvas.toDataURL("image/png");
+  const imgData = canvas.toDataURL("image/JPEG");
 
-  // A4 size in mm
   const pdf = new jsPDF("p", "mm", "a4");
   const pageWidth = pdf.internal.pageSize.getWidth();
   const pageHeight = pdf.internal.pageSize.getHeight();
 
-  // Canvas dimensions in px
-  const imgWidthPx = canvas.width;
-  const imgHeightPx = canvas.height;
+  const imgWidth = pageWidth;
+  const imgHeight =
+    (canvas.height * imgWidth) / canvas.width;
 
-  // Convert px → mm
-  const imgWidthMm = pageWidth;
-  const imgHeightMm =
-    (imgHeightPx * imgWidthMm) / imgWidthPx;
-
-  let remainingHeight = imgHeightMm;
+  let heightLeft = imgHeight;
   let position = 0;
 
-  // First page
-  pdf.addImage(
-    imgData,
-    "PNG",
-    0,
-    position,
-    imgWidthMm,
-    imgHeightMm
-  );
+  pdf.addImage(imgData, "JPEG", 0, position, imgWidth, imgHeight);
+  heightLeft -= pageHeight;
 
-  remainingHeight -= pageHeight;
-
-  // Additional pages
-  while (remainingHeight > 0) {
+  while (heightLeft > 0) {
     position -= pageHeight;
     pdf.addPage();
-    pdf.addImage(
-      imgData,
-      "PNG",
-      0,
-      position,
-      imgWidthMm,
-      imgHeightMm
-    );
-    remainingHeight -= pageHeight;
+    pdf.addImage(imgData, "JPEG", 0, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight;
   }
 
-  pdf.save(fileName);
+  return pdf.output("blob");
+}
+
+/**
+ * Generate & download PDF (classic export button)
+ */
+export async function exportMenuPDF(
+  element: HTMLElement,
+  fileName = "menu.pdf"
+): Promise<void> {
+  const blob = await generateMenuPdfBlob(element);
+
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = fileName;
+  a.click();
+
+  URL.revokeObjectURL(url);
 }

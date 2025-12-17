@@ -17,6 +17,7 @@ export interface MenuMeta {
   address?: string;
   currency: CurrencyCode;
   logoUrl?: string;
+  templateName?: string;
 }
 
 export interface ThemeConfig {

@@ -1,81 +1,90 @@
-import { ThemeVariant } from "@/types/menu";
 import { useMenuEditor } from "@/context/MenuEditorContext";
-
-
-const THEMES: ThemeVariant[] = [
-  "light",
-  "dark",
-  "elegant",
-  "vintage",
-  "bold",
-];
+import { TEMPLATES } from "@/constants/templates";
+import { ThemeVariant } from "@/types/menu";
+import clsx from "clsx";
 
 export function ThemeControls() {
   const { menu, setMenu } = useMenuEditor();
 
   return (
-    <div className="bg-white rounded-xl p-4 shadow mb-4">
+    <div className="bg-background text-foreground rounded-xl p-4 shadow mb-4">
       <h3 className="font-semibold mb-3">Theme</h3>
 
-      <div className="flex gap-2 flex-wrap">
-        {THEMES.map((theme) => (
+      {/* Theme picker */}
+      <div className="flex gap-2 flex-wrap mb-4">
+        {Object.entries(TEMPLATES).map(([key, t]) => {
+          const active = menu.theme.theme === key;
+
+          return (
+            <button
+              key={key}
+              title={t.tooltip}
+              onClick={() =>
+                setMenu((m) => ({
+                  ...m,
+                  theme: {
+                    ...m.theme,
+                    theme: key as ThemeVariant,
+                  },
+                }))
+              }
+              className={clsx(
+                "px-3 py-1 rounded border text-sm capitalize transition",
+                active
+                  ? "bg-primary text-white border-primary"
+                  : "bg-background hover:bg-gray-100"
+              )}
+            >
+              {t.label}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Layout picker */}
+      <div>
+        <h4 className="font-medium text-sm mb-2">Layout</h4>
+
+        <div className="flex gap-2">
           <button
-            key={theme}
             onClick={() =>
               setMenu((m) => ({
                 ...m,
-                theme: { ...m.theme, theme },
+                theme: {
+                  ...m.theme,
+                  layout: "single-column",
+                },
               }))
             }
-            className={`px-3 py-1 rounded border text-sm capitalize ${menu.theme.theme === theme
-                ? "bg-black text-white"
-                : "bg-white"
-              }`}
+            className={clsx(
+              "px-3 py-1 rounded border text-sm transition",
+              menu.theme.layout === "single-column"
+                ? "bg-primary text-white border-primary"
+                : "bg-background hover:bg-gray-100"
+            )}
           >
-            {theme}
+            Single Column
           </button>
-        ))}
 
-        {/* Layout Toggle */}
-        <div>
-          <label className="block text-sm mb-1">Layout</label>
-          <div className="flex gap-2">
-            <button
-              onClick={() =>
-                setMenu((m) => ({
-                  ...m,
-                  theme: {
-                    ...m.theme,
-                    layout: "single-column",
-                  },
-                }))
-              }
-              className={`px-3 py-1 rounded border text-sm ${menu.theme.layout === "single-column"
-                  ? "bg-black text-white"
-                  : "bg-white"
-                }`}
-            >
-              Single Column
-            </button>
-
-            <button
-              onClick={() =>
-                setMenu((m) => ({
-                  ...m,
-                  theme: {
-                    ...m.theme,
-                    layout: "two-column",
-                  },
-                }))
-              }
-              className={`px-3 py-1 rounded border text-sm ${menu.theme.layout === "two-column"
-                  ? "bg-black text-white"
-                  : "bg-white"
-                }`}
-            >
-              Two Column
-            </button>
-          </div>
+          <button
+            onClick={() =>
+              setMenu((m) => ({
+                ...m,
+                theme: {
+                  ...m.theme,
+                  layout: "two-column",
+                },
+              }))
+            }
+            className={clsx(
+              "px-3 py-1 rounded border text-sm transition",
+              menu.theme.layout === "two-column"
+                ? "bg-primary text-white border-primary"
+                : "bg-background hover:bg-gray-100"
+            )}
+          >
+            Two Column
+          </button>
         </div>
       </div>
     </div>

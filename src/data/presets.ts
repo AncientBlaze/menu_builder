@@ -8,6 +8,7 @@ export const PRESETS: MenuPreset[] = [
     category: "vintage",
     document: {
       meta: {
+        templateName: "Vintage Café",
         restaurantName: "Old Town Café",
         tagline: "Since 1984",
         address: "Market Street",
@@ -72,6 +73,7 @@ export const PRESETS: MenuPreset[] = [
     category: "elegant",
     document: {
       meta: {
+        templateName: "Elegant Dining",
         restaurantName: "La Maison",
         tagline: "Fine Dining Experience",
         address: "Park Street",
@@ -136,6 +138,7 @@ export const PRESETS: MenuPreset[] = [
     category: "bold",
     document: {
       meta: {
+        templateName: "Street Food Hub",
         restaurantName: "Spice Junction",
         tagline: "Hot · Fast · Desi",
         address: "Food Court",
@@ -200,6 +203,7 @@ export const PRESETS: MenuPreset[] = [
     category: "modern",
     document: {
       meta: {
+        templateName: "Minimal Coffee Bar",
         restaurantName: "Bean & Brew",
         tagline: "Freshly Brewed Everyday",
         address: "High Street",

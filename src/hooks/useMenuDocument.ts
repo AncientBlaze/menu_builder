@@ -4,10 +4,10 @@ import { nanoid } from "nanoid";
 
 const initialMenu: MenuDocument = {
   meta: {
-    restaurantName: "Indranil's cafe",
+    restaurantName: "Indian cafe",
     tagline: "Fine Food & Drinks",
     address: "123 Main Street · (555) 123-4567",
-    currency: "INR",
+    currency: "$",
   },
   theme: {
     theme: "light",
