@@ -2,16 +2,14 @@ import { useState } from "react";
 import { PRESETS } from "@/data/presets";
 import { useMenuEditor } from "@/context/MenuEditorContext";
 import { exportMenuPDF } from "@/utils/pdf";
-
 import { QrPreviewModal } from "../QrPreviewModal";
 import { IoQrCodeOutline } from "react-icons/io5";
-import { saveMenu } from "@/utils/menuStore";
+import { publishMenu } from "@/utils/api";
 
 export function PreviewToolbar() {
   const { menu, setMenu } = useMenuEditor();
 
   const [presetIndex, setPresetIndex] = useState(0);
-  const [showQr, setShowQr] = useState(false);
   const [qrValue, setQrValue] = useState<string | null>(null);
 
   const applyPresetByIndex = (index: number) => {
@@ -22,7 +20,8 @@ export function PreviewToolbar() {
 
   const prevPreset = () => {
     const nextIndex =
-      (presetIndex - 1 + PRESETS.length) % PRESETS.length;
+      (presetIndex - 1 + PRESETS.length) %
+      PRESETS.length;
     setPresetIndex(nextIndex);
     applyPresetByIndex(nextIndex);
   };
@@ -34,71 +33,102 @@ export function PreviewToolbar() {
     applyPresetByIndex(nextIndex);
   };
 
-  // ✅ MOBILE-SAFE QR: PDF → Base64 → Viewer URL
-  const openMenuQr = () => {
-  const id = saveMenu(menu);
-  const url = `${window.location.origin}/menu/${id}`;
-  setQrValue(url);
-  setShowQr(true);
-  console.log(url);
-  
-};
+  const openMenuQr = async () => {
+    const { id } = await publishMenu(menu);
+    const qrUrl = `${window.location.origin}/menu/${id}`;
+    setQrValue(qrUrl);
+  };
 
   return (
     <>
-      <div className="flex items-center justify-between bg-gray-300 rounded-lg px-4 py-2 mb-4">
-        <div className="flex gap-2">
-          <button className="px-2 py-1 bg-white rounded text-sm">≡</button>
-          <button className="px-2 py-1 bg-white rounded text-sm">☰</button>
-          <button className="px-2 py-1 bg-white rounded text-sm">▤</button>
+      <div
+        className="
+          flex flex-wrap items-center justify-between
+          gap-x-4 gap-y-3
+          bg-slate-200
+          rounded-xl
+          px-4 py-3
+          mb-4
+        "
+      >
+        {/* View controls (desktop-first, hide on mobile) */}
+        <div className="hidden sm:flex gap-2">
+          <button className="px-2 py-1 bg-white rounded text-sm">
+            ≡
+          </button>
+          <button className="px-2 py-1 bg-white rounded text-sm">
+            ☰
+          </button>
+          <button className="px-2 py-1 bg-white rounded text-sm">
+            ▤
+          </button>
         </div>
 
-        {/* QR → Mobile PDF */}
-
-        <div className="flex items-center gap-3">
+        {/* Preset switcher */}
+        <div
+          className="
+            flex items-center gap-2
+            order-1 sm:order-none
+            mx-auto sm:mx-0
+          "
+        >
           <button
             onClick={prevPreset}
             className="px-2 py-1 bg-white rounded"
+            aria-label="Previous preset"
           >
             ◀
           </button>
 
-          <span className="text-sm font-medium">
+          <span className="text-sm font-medium max-w-[140px] truncate text-center">
             {menu.meta.templateName}
           </span>
 
           <button
             onClick={nextPreset}
             className="px-2 py-1 bg-white rounded"
+            aria-label="Next preset"
           >
             ▶
           </button>
         </div>
 
-        <span className="flex gap-2">
+        {/* Actions */}
+        <div className="flex gap-2">
           <button
             onClick={openMenuQr}
-            title="Scan to view PDF"
-            className="px-2 py-1 bg-white rounded"
+            title="Scan to view menu"
+            className="
+              px-2 py-2
+              bg-white rounded
+              flex items-center justify-center
+            "
           >
-            <IoQrCodeOutline />
+            <IoQrCodeOutline size={18} />
           </button>
+
           <button
             onClick={() => {
-              const el = document.getElementById("menu-preview");
+              const el =
+                document.getElementById("menu-preview");
               if (el) exportMenuPDF(el);
             }}
-            className="px-3 py-1 bg-white rounded font-medium"
+            className="
+              px-3 py-2
+              bg-white rounded
+              text-sm font-medium
+              whitespace-nowrap
+            "
           >
-            Download as PDF
+            Download PDF
           </button>
-        </span>
+        </div>
       </div>
 
-      {showQr && qrValue && (
+      {qrValue && (
         <QrPreviewModal
           value={qrValue}
-          onClose={() => setShowQr(false)}
+          onClose={() => setQrValue(null)}
         />
       )}
     </>

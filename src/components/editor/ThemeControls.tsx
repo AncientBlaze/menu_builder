@@ -31,7 +31,7 @@ export function ThemeControls() {
               className={clsx(
                 "px-3 py-1 rounded border text-sm capitalize transition",
                 active
-                  ? "bg-primary text-white border-primary"
+                  ? "bg-black text-white border-primary"
                   : "bg-background hover:bg-gray-100"
               )}
             >
@@ -59,7 +59,7 @@ export function ThemeControls() {
             className={clsx(
               "px-3 py-1 rounded border text-sm transition",
               menu.theme.layout === "single-column"
-                ? "bg-primary text-white border-primary"
+                ? "bg-black text-white border-primary"
                 : "bg-background hover:bg-gray-100"
             )}
           >

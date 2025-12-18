@@ -1,7 +1,6 @@
 import { useParams } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { loadMenu } from "@/utils/menuStore";
-import { generateMenuPdfBlob } from "@/utils/pdf";
+import { fetchMenu } from "@/utils/api";
 import { MenuDocument } from "@/types/menu";
 import { MenuPreview } from "@/components/preview/MenuPreview";
 import { useMenuEditor } from "@/context/MenuEditorContext";
@@ -11,51 +10,66 @@ export default function MenuViewer() {
   const { setMenu } = useMenuEditor();
 
   const [menu, setLocalMenu] = useState<MenuDocument | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
-    if (!id) return;
-
-    const m = loadMenu(id);
-    if (m) {
-      setLocalMenu(m);
-      setMenu(m); // ✅ THIS IS THE KEY FIX
+    if (!id) {
+      setError(true);
+      setLoading(false);
+      return;
     }
+
+    setLoading(true);
+    setError(false);
+
+    fetchMenu(id)
+      .then((m) => {
+        setLocalMenu(m);
+        setMenu(m); // keep MenuPreview working
+      })
+      .catch(() => {
+        setError(true);
+        setLocalMenu(null);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, [id, setMenu]);
 
-  const downloadPdf = async () => {
-    const el = document.getElementById("menu-preview");
-    if (!el) return;
-
-    const blob = await generateMenuPdfBlob(el);
-    const url = URL.createObjectURL(blob);
-
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "menu.pdf";
-    a.click();
-
-    URL.revokeObjectURL(url);
-  };
-
-  if (!menu) {
+  /* 🌀 Loading */
+  if (loading) {
     return (
-      <div className="h-screen flex items-center justify-center">
-        Menu not found
+      <div className="min-h-screen flex items-center justify-center px-4">
+        <div className="text-sm opacity-70 animate-pulse text-center">
+          Loading menu…
+        </div>
       </div>
     );
   }
 
-  return (
-    <div className="p-4">
-      {/* MenuPreview now reads correct menu from context */}
-      <MenuPreview />
+  /* ❌ Error */
+  if (error || !menu) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-6 text-center">
+        <div>
+          <h2 className="text-lg font-semibold mb-1">
+            Menu not found
+          </h2>
+          <p className="text-sm opacity-70 leading-relaxed">
+            This menu may have expired or is unavailable.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
-      <button
-        onClick={downloadPdf}
-        className="fixed bottom-4 left-1/2 -translate-x-1/2 bg-black text-white px-4 py-2 rounded"
-      >
-        Download PDF
-      </button>
+  /* ✅ Success */
+  return (
+    <div className="min-h-screen bg-gray-50 flex justify-center">
+      <div className="w-full max-w-md sm:max-w-lg md:max-w-xl px-3 py-4">
+        <MenuPreview />
+      </div>
     </div>
   );
 }

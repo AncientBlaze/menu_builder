@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { generateQrDataUrl } from "@/utils/qr";
+import { RxCross1 } from "react-icons/rx";
+import { motion } from "motion/react";
 
 type Props = {
   value: string;
@@ -10,6 +12,7 @@ export function QrPreviewModal({ value, onClose }: Props) {
   const [qr, setQr] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!value) return;
     generateQrDataUrl(value).then(setQr);
   }, [value]);
 
@@ -17,9 +20,16 @@ export function QrPreviewModal({ value, onClose }: Props) {
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
-      <div className="bg-white rounded-xl p-5 w-[320px] text-center">
+      <div className="bg-white rounded-xl p-5 w-[320px] text-center relative overflow-hidden">
         <h3 className="font-semibold mb-3">Menu QR Code</h3>
-
+        <motion.button
+          initial={{x:25}}
+          whileHover={{ scale: 1.05, x: 0 }}
+          onClick={onClose}
+          className="px-3 py-1 text-md over absolute top-0 right-0 bg-red-600 rounded-xl"
+        >
+          <RxCross1 />
+        </motion.button>
         <img
           src={qr}
           alt="Menu QR"
@@ -34,13 +44,6 @@ export function QrPreviewModal({ value, onClose }: Props) {
           >
             Download
           </a>
-
-          <button
-            onClick={onClose}
-            className="px-3 py-1 border rounded text-sm"
-          >
-            Close
-          </button>
         </div>
       </div>
     </div>

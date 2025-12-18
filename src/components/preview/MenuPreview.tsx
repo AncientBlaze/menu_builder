@@ -8,7 +8,7 @@ export function MenuPreview() {
 
   const themeClasses = {
     light: "bg-white text-black",
-    dark: "bg-[black] text-white",
+    dark: "bg-black text-white",
     elegant: "bg-[#faf7f2] text-[#2e2a26]",
     vintage: "bg-[#f4efe8] text-[#3b332c]",
     bold: "bg-black text-white",
@@ -18,7 +18,10 @@ export function MenuPreview() {
     <div
       id="menu-preview"
       className={clsx(
-        "mx-auto max-w-200 rounded-lg p-10 shadow",
+        // 📱 Mobile → 🖥 Desktop
+        "mx-auto w-full max-w-md sm:max-w-lg md:max-w-xl lg:max-w-3xl",
+        "rounded-lg shadow",
+        "p-4 sm:p-6 md:p-8 lg:p-10",
         themeClasses[menu.theme.theme]
       )}
       style={{
@@ -32,17 +35,19 @@ export function MenuPreview() {
       }}
     >
       {/* Header */}
-      <header className="text-center mb-10">
-        <h1 className="text-3xl font-bold">
+      <header className="text-center mb-6 sm:mb-8 md:mb-10">
+        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">
           {menu.meta.restaurantName}
         </h1>
+
         {menu.meta.tagline && (
-          <p className="text-sm opacity-80 mt-1">
+          <p className="text-xs sm:text-sm opacity-80 mt-1">
             {menu.meta.tagline}
           </p>
         )}
+
         {menu.meta.address && (
-          <p className="text-xs opacity-70 mt-2">
+          <p className="text-[11px] sm:text-xs opacity-70 mt-2">
             {menu.meta.address}
           </p>
         )}
@@ -51,38 +56,34 @@ export function MenuPreview() {
       {/* Sections container */}
       <div
         className={clsx(
-          "gap-10",
+          "gap-6 sm:gap-8 md:gap-10",
           isTwoColumn
-            ? "grid grid-cols-2 items-start"
+            ? "grid grid-cols-1 md:grid-cols-2 items-start"
             : "flex flex-col"
         )}
       >
-
         {menu.sections.map((section) => (
-          <section
-            key={section.id}
-            className="mb-8"
-          >
+          <section key={section.id} className="mb-6 sm:mb-8">
             <h2
-              className="text-xl font-semibold border-b pb-1 mb-4"
-              style={{
-                borderColor: menu.theme.accentColor,
-              }}
+              className="text-lg sm:text-xl font-semibold border-b pb-1 mb-3 sm:mb-4"
+              style={{ borderColor: menu.theme.accentColor }}
             >
               {section.title}
             </h2>
 
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {section.items.map((item) => (
                 <div
                   key={item.id}
-                  className="flex justify-between gap-6"
+                  className="flex flex-col sm:flex-row sm:justify-between gap-2 sm:gap-6"
                 >
-                  <div>
+                  {/* Item info */}
+                  <div className="flex-1">
                     <div className="flex items-center gap-2">
-                      <span className="font-medium">
+                      <span className="font-medium text-sm sm:text-base">
                         {item.name}
                       </span>
+
                       {item.isVeg ? (
                         <span
                           className="inline-block w-2 h-2 bg-green-600 rounded-full"
@@ -97,13 +98,14 @@ export function MenuPreview() {
                     </div>
 
                     {item.description && (
-                      <p className="text-sm opacity-75">
+                      <p className="text-xs sm:text-sm opacity-75 leading-snug">
                         {item.description}
                       </p>
                     )}
                   </div>
 
-                  <div className="font-semibold">
+                  {/* Price */}
+                  <div className="text-sm sm:text-base font-semibold text-right sm:text-left whitespace-nowrap">
                     {menu.meta.currency} {item.price}
                   </div>
                 </div>

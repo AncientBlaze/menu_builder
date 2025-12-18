@@ -7,6 +7,16 @@ import viteTsConfigPaths from 'vite-tsconfig-paths'
 import netlify from '@netlify/vite-plugin-tanstack-start'
 
 const config = defineConfig({
+  server: {
+    allowedHosts:true,
+    proxy: {
+      "/api": {
+        target: "http://localhost:3001",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ""),
+      },
+    },
+  },
   plugins: [
     devtools(),
     netlify(),
