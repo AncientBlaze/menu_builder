@@ -27,6 +27,7 @@
 }
 
 .pdf-export * {
+  background-attachment: scroll !important;
   box-shadow: none !important;
   backdrop-filter: none !important;
   filter: none !important;

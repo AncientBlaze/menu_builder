@@ -39,12 +39,16 @@ function SortableSection({
         transform: CSS.Transform.toString(transform),
         transition,
       }}
-      className="mb-4"
+      className="mb-5"
     >
       <div
         {...listeners}
         {...attributes}
-        className="cursor-grab text-sm mb-1 select-none"
+        className="
+          cursor-grab select-none
+          text-xs font-medium mb-2
+          text-slate-500 dark:text-slate-400
+        "
       >
         ⠿ Section
       </div>
@@ -75,12 +79,16 @@ function SortableItem({
         transform: CSS.Transform.toString(transform),
         transition,
       }}
-      className="mb-2"
+      className="mb-3"
     >
       <div
         {...listeners}
         {...attributes}
-        className="cursor-grab text-xs mb-1 select-none"
+        className="
+          cursor-grab select-none
+          text-[11px] mb-1
+          text-slate-400 dark:text-slate-500
+        "
       >
         ⠿ Item
       </div>
@@ -96,7 +104,7 @@ function SortableItem({
 export function SectionsEditor() {
   const {
     menu,
-    setMenu,
+    updateMenu,
     addSection,
     addItem,
     removeSection,
@@ -122,8 +130,15 @@ export function SectionsEditor() {
   };
 
   return (
-    <div className="bg-white rounded-xl p-4 shadow">
-      <h3 className="font-semibold mb-4">
+    <div
+      className="
+        rounded-2xl p-4
+        bg-white dark:bg-slate-900
+        border border-slate-200 dark:border-slate-800
+        shadow-sm
+      "
+    >
+      <h3 className="text-sm font-semibold mb-4 text-slate-800 dark:text-slate-200">
         Sections & Items
       </h3>
 
@@ -140,32 +155,45 @@ export function SectionsEditor() {
               key={section.id}
               id={section.id}
             >
-              <div className="border rounded p-3">
+              <div
+                className="
+                  rounded-xl p-4 space-y-3
+                  bg-slate-50 dark:bg-slate-800
+                  border border-slate-200 dark:border-slate-700
+                "
+              >
                 {/* Section Header */}
-                <div className="flex items-center gap-2 mb-3">
+                <div className="flex items-center gap-2">
                   <input
-                    className="flex-1 border-b font-medium"
+                    className="
+                      flex-1 bg-transparent
+                      border-b border-slate-300 dark:border-slate-600
+                      text-sm font-medium
+                      text-slate-900 dark:text-slate-100
+                      focus:outline-none
+                      focus:border-slate-500
+                    "
                     value={section.title}
                     onChange={(e) =>
-                      setMenu((m) => ({
-                        ...m,
-                        sections: m.sections.map((s) =>
+                      updateMenu({
+                        sections: menu.sections.map((s) =>
                           s.id === section.id
-                            ? {
-                                ...s,
-                                title: e.target.value,
-                              }
+                            ? { ...s, title: e.target.value }
                             : s
                         ),
-                      }))
+                      })
                     }
+
                   />
 
                   <button
                     onClick={() =>
                       removeSection(section.id)
                     }
-                    className="text-red-500 text-sm"
+                    className="
+                      text-md text-red-500
+                      hover:text-red-600 py-2 px-2
+                    "
                     title="Remove section"
                   >
                     ✕
@@ -226,7 +254,14 @@ export function SectionsEditor() {
                 {/* Add Item */}
                 <button
                   onClick={() => addItem(section.id)}
-                  className="mt-2 text-sm bg-black text-white px-3 py-1 rounded"
+                  className="
+                    mt-1 inline-flex
+                    px-3 py-1.5
+                    rounded-md text-xs font-medium
+                    bg-slate-900 text-white
+                    dark:bg-slate-100 dark:text-slate-900
+                    hover:opacity-90
+                  "
                 >
                   + Add Item
                 </button>
@@ -239,7 +274,14 @@ export function SectionsEditor() {
       {/* Add Section */}
       <button
         onClick={addSection}
-        className="w-full bg-black text-white py-2 rounded mt-4"
+        className="
+          w-full mt-4
+          py-2 rounded-lg
+          text-sm font-semibold
+          bg-slate-900 text-white
+          dark:bg-slate-100 dark:text-slate-900
+          hover:opacity-90
+        "
       >
         + Add Section
       </button>

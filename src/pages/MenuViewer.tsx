@@ -26,7 +26,7 @@ export default function MenuViewer() {
     fetchMenu(id)
       .then((m) => {
         setLocalMenu(m);
-        setMenu(m); // keep MenuPreview working
+        updateMenu(m); // keep MenuPreview working
       })
       .catch(() => {
         setError(true);

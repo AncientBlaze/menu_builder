@@ -3,7 +3,7 @@ import { MenuPreview } from "./MenuPreview";
 
 export function PreviewPane() {
   return (
-    <section className="flex-1 flex flex-col p-3 bg-no-repeat bg-cover bg-center bg-[url('https://picsum.photos/1920')]">
+    <section className="flex-1 flex flex-col p-3 bg-no-repeat bg-cover bg-center">
       {/* Tabs */}
 
       {/* Toolbar */}

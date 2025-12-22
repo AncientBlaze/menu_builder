@@ -1,5 +1,5 @@
 import User from "../Model/User.js";
-import { comparePassword, generatePassword } from "../Utils/bcriptFile.js";
+import { comparePassword, generatePassword } from "../Utils/bcryptFile.js";
 
 export const Signup = async (req, res) => {
     const { name, email, password, resturent_name } = req.body;

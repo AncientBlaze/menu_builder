@@ -1,5 +1,6 @@
 import { MenuDocument } from "@/types/menu";
 import clsx from "clsx";
+import { GOOGLE_FONTS } from "@/constants/fonts";
 
 type Props = {
   document: MenuDocument;
@@ -10,6 +11,12 @@ export function PresetPreview({
   document,
   active = false,
 }: Props) {
+  const { theme, meta, visuals, sections } = document;
+
+  /* --------------------
+     Theme base colors
+  -------------------- */
+
   const themeClasses = {
     light: "bg-white text-black",
     dark: "bg-neutral-900 text-white",
@@ -18,16 +25,37 @@ export function PresetPreview({
     bold: "bg-black text-white",
   };
 
+  /* --------------------
+     Font mapping
+  -------------------- */
+
+  const fontCss =
+    GOOGLE_FONTS.find((f) => f.value === theme.fontFamily)?.css ??
+    "serif";
+
+  /* --------------------
+     Background
+  -------------------- */
+
+  const bg = visuals?.background;
+  const bgImage = bg?.url;
+
+  /* --------------------
+     Logo
+  -------------------- */
+
+  const logo = visuals?.logo;
+
   return (
     <div
       className={clsx(
-        "border rounded-lg overflow-hidden transition",
+        "rounded-lg overflow-hidden transition",
         active
-          ? "border border-b-blue-500"
-          : "hover:ring-1 hover:ring-gray-400"
+          ? "ring-2 ring-blue-500 shadow-md"
+          : "hover:ring-1 hover:ring-slate-400"
       )}
     >
-      {/* Scale wrapper */}
+      {/* SCALE WRAPPER */}
       <div
         className="origin-top-left"
         style={{
@@ -35,58 +63,119 @@ export function PresetPreview({
           width: "400%",
         }}
       >
+        {/* PREVIEW CANVAS */}
         <div
           className={clsx(
-            "p-6 min-h-[300px]",
-            themeClasses[document.theme.theme]
+            "relative p-6 min-h-[300px]",
+            themeClasses[theme.theme]
           )}
           style={{
-            fontFamily:
-              document.theme.fontFamily === "serif"
-                ? "Georgia, serif"
-                : document.theme.fontFamily === "sans"
-                ? "Inter, sans-serif"
-                : "monospace",
+            fontFamily: fontCss,
+            backgroundImage: bgImage
+              ? `url(${bgImage})`
+              : undefined,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
           }}
         >
-          {/* Header */}
-          <div className="text-center mb-4">
-            <div className="font-bold">
-              {document.meta.restaurantName}
+          {/* Background overlay */}
+          {bgImage && (
+            <div
+              className="absolute inset-0"
+              style={{
+                backgroundColor:
+                  bg?.overlay?.color ?? "#000000",
+                opacity: bg?.overlay?.opacity ?? 0.25,
+              }}
+            />
+          )}
+
+          {/* CONTENT */}
+          <div className="relative z-10">
+            {/* LOGO (TOP) */}
+            {logo?.url && logo.position === "top" && (
+              <div className="flex justify-center mb-4">
+                <img
+                  src={logo.url}
+                  alt="Logo"
+                  style={{
+                    height: logo.size ?? 48,
+                  }}
+                />
+              </div>
+            )}
+
+            {/* HEADER */}
+            <div className="text-center mb-4">
+              <div className="font-bold">
+                {meta.restaurantName}
+              </div>
+              {meta.tagline && (
+                <div className="text-xs opacity-70">
+                  {meta.tagline}
+                </div>
+              )}
             </div>
-            {document.meta.tagline && (
-              <div className="text-xs opacity-70">
-                {document.meta.tagline}
+
+            {/* SECTIONS (lightweight) */}
+            <div className="space-y-3">
+              {sections.slice(0, 2).map((s) => (
+                <div key={s.id}>
+                  <div
+                    className="text-sm font-semibold border-b mb-1"
+                    style={{
+                      borderColor:
+                        theme.dividerStyle === "accent"
+                          ? theme.accentColor
+                          : "currentColor",
+                    }}
+                  >
+                    {s.title}
+                  </div>
+
+                  {s.items.slice(0, 2).map((i) => (
+                    <div
+                      key={i.id}
+                      className="flex justify-between text-xs opacity-90"
+                    >
+                      <span className="truncate">
+                        {i.name}
+                      </span>
+                      <span>
+                        {meta.currency}
+                        {i.price}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+
+            {/* LOGO (BOTTOM) */}
+            {logo?.url && logo.position === "bottom" && (
+              <div className="flex justify-center mt-6">
+                <img
+                  src={logo.url}
+                  alt="Logo"
+                  style={{
+                    height: logo.size ?? 48,
+                  }}
+                />
               </div>
             )}
           </div>
 
-          {/* Sections (lightweight render) */}
-          <div className="space-y-3">
-            {document.sections.slice(0, 2).map((s) => (
-              <div key={s.id}>
-                <div
-                  className="text-sm font-semibold border-b mb-1"
-                  style={{
-                    borderColor:
-                      document.theme.accentColor,
-                  }}
-                >
-                  {s.title}
-                </div>
-
-                {s.items.slice(0, 2).map((i) => (
-                  <div
-                    key={i.id}
-                    className="flex justify-between text-xs"
-                  >
-                    <span>{i.name}</span>
-                    <span>{i.price}</span>
-                  </div>
-                ))}
-              </div>
-            ))}
-          </div>
+          {/* LOGO OVERLAY */}
+          {logo?.url && logo.position === "overlay" && (
+            <img
+              src={logo.url}
+              alt="Logo"
+              className="absolute bottom-4 right-4 opacity-80"
+              style={{
+                height: (logo.size ?? 48) * 0.9,
+              }}
+            />
+          )}
         </div>
       </div>
     </div>

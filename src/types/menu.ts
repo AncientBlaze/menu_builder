@@ -9,10 +9,58 @@ export interface MenuMeta {
   tagline?: string;
   address?: string;
   currency: CurrencyCode;
-  logoUrl?: string;
 
   /** Which template this menu is based on */
   templateName?: string;
+}
+
+/* =====================
+   Visuals
+===================== */
+
+export type LogoPosition =
+  | "top"
+  | "bottom"
+  | "overlay";
+
+export type LogoAlign =
+  | "left"
+  | "center"
+  | "right";
+
+export type BackgroundType =
+  | "none"
+  | "image"
+  | "animated";
+
+/* ---------------------
+   Visual Config
+--------------------- */
+export interface MenuVisuals {
+  logo?: {
+    url: string;
+    position: "top" | "bottom" | "overlay";
+    align: "left" | "center" | "right";
+    size: number;
+
+    // NEW (only used if overlay)
+    offset?: {
+      x: number; // px
+      y: number; // px
+    };
+  };
+
+  background?: {
+    type: "none" | "image" | "animated";
+    url?: string;
+    overlay?: {
+      color: string;
+      opacity: number;
+    };
+    exportMode?: {
+      freezeAnimation: boolean;
+    };
+  };
 }
 
 /* =====================
@@ -27,7 +75,7 @@ export type ThemeVariant =
   | "bold";
 
 export type FontFamily =
-  // Serif (classic / fine dining)
+  // Serif
   | "Playfair Display"
   | "Merriweather"
   | "Lora"
@@ -35,7 +83,7 @@ export type FontFamily =
   | "Source Serif 4"
   | "Crimson Pro"
 
-  // Sans (modern / cafés)
+  // Sans
   | "Inter"
   | "Poppins"
   | "Roboto"
@@ -44,29 +92,15 @@ export type FontFamily =
   | "Nunito"
   | "Raleway"
 
-  // Display (bold / street / headings)
+  // Display
   | "Oswald"
   | "DM Sans"
   | "Archivo";
 
-
-
-export type LayoutType =
-  | "single-column"
-  | "two-column";
-
-export type Density =
-  | "compact"
-  | "comfortable";
-
-export type DividerStyle =
-  | "none"
-  | "line"
-  | "accent";
-
-export type PriceAlignment =
-  | "right"
-  | "inline";
+export type LayoutType = "single-column" | "two-column";
+export type Density = "compact" | "comfortable";
+export type DividerStyle = "none" | "line" | "accent";
+export type PriceAlignment = "right" | "inline";
 
 export interface ThemeConfig {
   /* Visual identity */
@@ -74,7 +108,7 @@ export interface ThemeConfig {
   fontFamily: FontFamily;
   accentColor: string;
 
-  /* Layout & behavior (Template Mode) */
+  /* Layout & behavior */
   layout: LayoutType;
   density: Density;
   dividerStyle: DividerStyle;
@@ -99,8 +133,13 @@ export interface MenuSection {
   items: MenuItem[];
 }
 
+/* =====================
+   Root Document
+===================== */
+
 export interface MenuDocument {
   meta: MenuMeta;
   theme: ThemeConfig;
+  visuals?: MenuVisuals;
   sections: MenuSection[];
 }

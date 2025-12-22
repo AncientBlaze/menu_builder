@@ -1,22 +1,28 @@
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 
+/* --------------------------------
+   Internal helper
+-------------------------------- */
+
+const nextPaint = () =>
+  new Promise<void>((resolve) =>
+    requestAnimationFrame(() => resolve())
+  );
+
+/* --------------------------------
+   Generate PDF Blob
+-------------------------------- */
+
 export async function generateMenuPdfBlob(
   element: HTMLElement
 ): Promise<Blob> {
   const canvas = await html2canvas(element, {
-    scale: 2, // sharper text
+    scale: 2,
     useCORS: true,
-    backgroundColor: "#ffffff"
+    backgroundColor: "#ffffff",
+    logging: false,
   });
-  const flat = document.createElement("canvas");
-  flat.width = canvas.width;
-  flat.height = canvas.height;
-
-  const ctx = flat.getContext("2d")!;
-  ctx.fillStyle = "#ffffff";
-  ctx.fillRect(0, 0, flat.width, flat.height);
-  ctx.drawImage(canvas, 0, 0);
 
   const pdf = new jsPDF("p", "mm", "a4");
 
@@ -26,13 +32,12 @@ export async function generateMenuPdfBlob(
   const imgWidth = pageWidth;
   const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-  const pageCanvas = document.createElement("canvas");
-  const pageCtx = pageCanvas.getContext("2d")!;
-
   const pageHeightPx = Math.round(
     (canvas.width * pageHeight) / pageWidth
   );
 
+  const pageCanvas = document.createElement("canvas");
+  const pageCtx = pageCanvas.getContext("2d")!;
 
   let renderedHeight = 0;
 
@@ -43,7 +48,13 @@ export async function generateMenuPdfBlob(
       canvas.height - renderedHeight
     );
 
-    pageCtx.clearRect(0, 0, pageCanvas.width, pageCanvas.height);
+    pageCtx.clearRect(
+      0,
+      0,
+      pageCanvas.width,
+      pageCanvas.height
+    );
+
     pageCtx.drawImage(
       canvas,
       0,
@@ -66,7 +77,8 @@ export async function generateMenuPdfBlob(
       0,
       0,
       imgWidth,
-      (pageCanvas.height * imgWidth) / pageCanvas.width
+      (pageCanvas.height * imgWidth) /
+        pageCanvas.width
     );
 
     renderedHeight += pageHeightPx;
@@ -75,14 +87,32 @@ export async function generateMenuPdfBlob(
   return pdf.output("blob");
 }
 
+/* --------------------------------
+   Export with Editor State
+-------------------------------- */
+
 export async function exportMenuPDF(
   element: HTMLElement,
-  fileName = "menu.pdf"
+  options?: {
+    fileName?: string;
+    setExportMode?: (v: boolean) => void;
+  }
 ): Promise<void> {
+  const fileName = options?.fileName ?? "menu.pdf";
 
+  // 🔒 Enter export mode
+  options?.setExportMode?.(true);
   element.classList.add("pdf-export");
+
+  // 🧘 Let layout + fonts + bg settle
+  await nextPaint();
+  await nextPaint();
+
   const blob = await generateMenuPdfBlob(element);
+
+  // 🔓 Exit export mode
   element.classList.remove("pdf-export");
+  options?.setExportMode?.(false);
 
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");

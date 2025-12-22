@@ -1,2 +1,0 @@
-DB_URL=mongodb://localhost:27017/menu-server
-PORT=3001

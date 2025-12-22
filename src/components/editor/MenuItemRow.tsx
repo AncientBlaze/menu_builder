@@ -37,11 +37,23 @@ export function MenuItemRow({ sectionId, item }: Props) {
   };
 
   return (
-    <div className="border rounded p-2 space-y-1">
+    <div
+      className="
+        rounded-lg p-2 space-y-2
+        bg-white dark:bg-slate-900
+        border border-slate-200 dark:border-slate-700
+      "
+    >
       {/* Header */}
       <div className="flex items-center gap-2">
         <input
-          className="flex-1 border-b text-sm"
+          className="
+            flex-1 bg-transparent
+            border-b border-slate-300 dark:border-slate-600
+            text-sm
+            text-slate-900 dark:text-slate-100
+            focus:outline-none focus:border-slate-500
+          "
           value={item.name}
           onChange={(e) =>
             updateItem(sectionId, item.id, {
@@ -50,22 +62,30 @@ export function MenuItemRow({ sectionId, item }: Props) {
           }
         />
 
-        {/* Reorder buttons */}
+        {/* Reorder */}
         <div className="flex gap-1">
           <button
             onClick={moveUp}
             disabled={index === 0}
-            className="text-xs px-1 disabled:opacity-30"
+            className="
+              text-md px-1
+              text-slate-500 dark:text-slate-400
+              hover:text-slate-700 dark:hover:text-slate-200
+              disabled:opacity-30
+            "
             title="Move up"
           >
             ▲
           </button>
           <button
             onClick={moveDown}
-            disabled={
-              index === section.items.length - 1
-            }
-            className="text-xs px-1 disabled:opacity-30"
+            disabled={index === section.items.length - 1}
+            className="
+              text-md px-1
+              text-slate-500 dark:text-slate-400
+              hover:text-slate-700 dark:hover:text-slate-200
+              disabled:opacity-30
+            "
             title="Move down"
           >
             ▼
@@ -77,7 +97,10 @@ export function MenuItemRow({ sectionId, item }: Props) {
           onClick={() =>
             removeItem(sectionId, item.id)
           }
-          className="text-red-500 text-xs"
+          className="
+            text-md text-red-500
+            hover:text-red-600
+          "
           title="Remove item"
         >
           ✕
@@ -85,10 +108,17 @@ export function MenuItemRow({ sectionId, item }: Props) {
       </div>
 
       {/* Price & Veg */}
-      <div className="flex gap-2 items-center">
+      <div className="flex items-center gap-3">
         <input
           type="number"
-          className="w-20 border rounded px-2 text-sm"
+          className="
+            w-20 px-2 py-1 text-sm
+            rounded-md
+            bg-white dark:bg-slate-800
+            border border-slate-300 dark:border-slate-600
+            text-slate-900 dark:text-slate-100
+            focus:outline-none focus:ring-1 focus:ring-slate-400
+          "
           value={item.price}
           onChange={(e) =>
             updateItem(sectionId, item.id, {
@@ -97,7 +127,7 @@ export function MenuItemRow({ sectionId, item }: Props) {
           }
         />
 
-        <label className="flex items-center gap-1 text-xs">
+        <label className="flex items-center gap-1 text-xs text-slate-600 dark:text-slate-400">
           <input
             type="checkbox"
             checked={item.isVeg}
@@ -106,6 +136,7 @@ export function MenuItemRow({ sectionId, item }: Props) {
                 isVeg: e.target.checked,
               })
             }
+            className="accent-green-600"
           />
           Veg
         </label>
@@ -113,7 +144,14 @@ export function MenuItemRow({ sectionId, item }: Props) {
 
       {/* Description */}
       <textarea
-        className="w-full border rounded text-xs p-1"
+        className="
+          w-full text-xs p-2 rounded-md
+          bg-white dark:bg-slate-800
+          border border-slate-300 dark:border-slate-600
+          text-slate-900 dark:text-slate-100
+          placeholder:text-slate-400
+          focus:outline-none focus:ring-1 focus:ring-slate-400
+        "
         placeholder="Description"
         value={item.description ?? ""}
         onChange={(e) =>
