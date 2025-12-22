@@ -1,10 +1,7 @@
 import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
-// import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
-// import { TanStackDevtools } from '@tanstack/react-devtools'
-
-// import Header from '../components/Header'
-
 import appCss from '../styles.css?url'
+import { QueryClientProvider } from "@tanstack/react-query";
+import { queryClient } from "@/QueryClient";
 
 export const Route = createRootRoute({
   head: () => ({
@@ -25,9 +22,12 @@ export const Route = createRootRoute({
         rel: 'stylesheet',
         href: appCss,
       },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Merriweather:wght@400;700&family=Lora:wght@400;600;700&family=Libre+Baskerville:wght@400;700&family=Source+Serif+4:wght@400;600;700&family=Crimson+Pro:wght@400;600;700&family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&family=Roboto:wght@400;500;700&family=Montserrat:wght@400;500;600;700&family=Open+Sans:wght@400;600;700&family=Nunito:wght@400;600;700&family=Raleway:wght@400;600;700&family=Oswald:wght@400;500;600&family=DM+Sans:wght@400;500;700&family=Archivo:wght@400;500;600;700&display=swap"
+      }
     ],
   }),
-
   shellComponent: RootDocument,
 })
 
@@ -38,19 +38,9 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        {/* <Header /> */}
+        <QueryClientProvider client={queryClient}>
         {children}
-        {/* <TanStackDevtools
-          config={{
-            position: 'bottom-right',
-          }}
-          plugins={[
-            {
-              name: 'Tanstack Router',
-              render: <TanStackRouterDevtoolsPanel />,
-            },
-          ]}
-        /> */}
+        </QueryClientProvider>
         <Scripts />
       </body>
     </html>

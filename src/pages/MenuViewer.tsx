@@ -69,6 +69,11 @@ export default function MenuViewer() {
     <div className="min-h-screen bg-gray-50 flex justify-center">
       <div className="w-full max-w-md sm:max-w-lg md:max-w-xl px-3 py-4">
         <MenuPreview />
+        {/* <div className="flex justify-center items-center bg-emerald-200">
+        <button className="px-2 py-5 bg-red-500 rounded-xl ">
+          Order Now
+        </button>
+        </div> */}
       </div>
     </div>
   );

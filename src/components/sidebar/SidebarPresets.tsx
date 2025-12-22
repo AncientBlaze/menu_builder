@@ -12,10 +12,14 @@ const clone = <T,>(v: T): T =>
   JSON.parse(JSON.stringify(v));
 
 export function SidebarPresets() {
-  const { menu, setMenu } = useMenuEditor();
+  const {
+    menu,
+    pages,
+    activePageId,
+    openPageFromPreset,
+  } = useMenuEditor();
 
   const [search, setSearch] = useState("");
-  const [activeId, setActiveId] = useState<string | null>(null);
   const [userPresets, setUserPresets] = useState<MenuPreset[]>([]);
   const [isOpen, setIsOpen] = useState(true);
 
@@ -50,12 +54,6 @@ export function SidebarPresets() {
     };
 
     setUserPresets((p) => [newPreset, ...p]);
-    setActiveId(newPreset.id);
-  };
-
-  const applyPreset = (preset: MenuPreset) => {
-    setActiveId(preset.id);
-    setMenu(clone(preset.document));
   };
 
   return (
@@ -113,29 +111,38 @@ export function SidebarPresets() {
             {/* Preset list */}
             <div className="flex-1 overflow-y-auto space-y-5 pr-1">
               {filteredPresets.length === 0 && (
-                <div className="text-xs opacity-50 text-center py-8">
+                <div className="text-sm opacity-50 text-center py-8">
                   No templates found
                 </div>
               )}
 
               {filteredPresets.map((preset) => {
+                const page = pages.find(
+                  (p) => p.id === preset.id
+                );
+
                 const isActive =
-                  activeId === preset.id ||
-                  menu.meta.templateName ===
-                    preset.document.meta.templateName;
+                  page && page.id === activePageId;
+
+                const isOpenPage = Boolean(page);
 
                 return (
                   <button
                     key={preset.id}
-                    onClick={() => applyPreset(preset)}
-                    className="w-full text-left group"
+                    onClick={() =>
+                      openPageFromPreset(preset)
+                    }
+                    className="w-full px-2 py-2 text-left group"
                   >
                     <div
                       className={`
                         rounded-xl p-1 transition
-                        ${isActive
-                          ? "ring-2 ring-blue-500"
-                          : "hover:ring-1 hover:ring-slate-600"
+                        ${
+                          isActive
+                            ? "ring-2 ring-blue-500"
+                            : isOpenPage
+                            ? "ring-1 ring-slate-600"
+                            : "hover:ring-1 hover:ring-slate-600"
                         }
                       `}
                     >
@@ -148,13 +155,21 @@ export function SidebarPresets() {
                     <div
                       className={`
                         mt-2 text-xs text-center transition
-                        ${isActive
-                          ? "text-blue-400 font-medium"
-                          : "opacity-70 group-hover:opacity-100"
+                        ${
+                          isActive
+                            ? "text-blue-400 font-medium"
+                            : isOpenPage
+                            ? "opacity-90"
+                            : "opacity-70 group-hover:opacity-100"
                         }
                       `}
                     >
                       {preset.name}
+                      {isOpenPage && !isActive && (
+                        <span className="ml-1 opacity-50">
+                          • open
+                        </span>
+                      )}
                     </div>
                   </button>
                 );

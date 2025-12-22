@@ -1,4 +1,23 @@
+/* =====================
+   Meta
+===================== */
+
 export type CurrencyCode = "₨" | "$" | "€";
+
+export interface MenuMeta {
+  restaurantName: string;
+  tagline?: string;
+  address?: string;
+  currency: CurrencyCode;
+  logoUrl?: string;
+
+  /** Which template this menu is based on */
+  templateName?: string;
+}
+
+/* =====================
+   Theme / Template
+===================== */
 
 export type ThemeVariant =
   | "light"
@@ -7,26 +26,64 @@ export type ThemeVariant =
   | "vintage"
   | "bold";
 
-export type FontFamily = "serif" | "sans" | "mono";
+export type FontFamily =
+  // Serif (classic / fine dining)
+  | "Playfair Display"
+  | "Merriweather"
+  | "Lora"
+  | "Libre Baskerville"
+  | "Source Serif 4"
+  | "Crimson Pro"
 
-export type LayoutType = "single-column" | "two-column";
+  // Sans (modern / cafés)
+  | "Inter"
+  | "Poppins"
+  | "Roboto"
+  | "Montserrat"
+  | "Open Sans"
+  | "Nunito"
+  | "Raleway"
 
-export interface MenuMeta {
-  restaurantName: string;
-  tagline?: string;
-  address?: string;
-  currency: CurrencyCode;
-  logoUrl?: string;
-  templateName?: string;
-}
+  // Display (bold / street / headings)
+  | "Oswald"
+  | "DM Sans"
+  | "Archivo";
+
+
+
+export type LayoutType =
+  | "single-column"
+  | "two-column";
+
+export type Density =
+  | "compact"
+  | "comfortable";
+
+export type DividerStyle =
+  | "none"
+  | "line"
+  | "accent";
+
+export type PriceAlignment =
+  | "right"
+  | "inline";
 
 export interface ThemeConfig {
+  /* Visual identity */
   theme: ThemeVariant;
   fontFamily: FontFamily;
-  layout: LayoutType;
-  compactItems: boolean;
   accentColor: string;
+
+  /* Layout & behavior (Template Mode) */
+  layout: LayoutType;
+  density: Density;
+  dividerStyle: DividerStyle;
+  priceAlignment: PriceAlignment;
 }
+
+/* =====================
+   Menu Content
+===================== */
 
 export interface MenuItem {
   id: string;

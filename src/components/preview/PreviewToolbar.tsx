@@ -1,112 +1,64 @@
 import { useState } from "react";
-import { PRESETS } from "@/data/presets";
 import { useMenuEditor } from "@/context/MenuEditorContext";
 import { exportMenuPDF } from "@/utils/pdf";
 import { QrPreviewModal } from "../QrPreviewModal";
 import { IoQrCodeOutline } from "react-icons/io5";
 import { publishMenu } from "@/utils/api";
+import { TemplateTabs } from "./TemplateTabs";
 
 export function PreviewToolbar() {
-  const { menu, setMenu } = useMenuEditor();
-
-  const [presetIndex, setPresetIndex] = useState(0);
+  const { menu } = useMenuEditor();
   const [qrValue, setQrValue] = useState<string | null>(null);
-
-  const applyPresetByIndex = (index: number) => {
-    const preset = PRESETS[index];
-    if (!preset) return;
-    setMenu(JSON.parse(JSON.stringify(preset.document)));
-  };
-
-  const prevPreset = () => {
-    const nextIndex =
-      (presetIndex - 1 + PRESETS.length) %
-      PRESETS.length;
-    setPresetIndex(nextIndex);
-    applyPresetByIndex(nextIndex);
-  };
-
-  const nextPreset = () => {
-    const nextIndex =
-      (presetIndex + 1) % PRESETS.length;
-    setPresetIndex(nextIndex);
-    applyPresetByIndex(nextIndex);
-  };
 
   const openMenuQr = async () => {
     const { id } = await publishMenu(menu);
-    const qrUrl = `${window.location.origin}/menu/${id}`;
-    setQrValue(qrUrl);
+    setQrValue(`${window.location.origin}/menu/${id}`);
   };
 
   return (
     <>
       <div
         className="
-          flex flex-wrap items-center justify-between
-          gap-x-4 gap-y-3
-          bg-slate-200
-          rounded-xl
+          relative
+          flex items-center gap-4
           px-4 py-3
-          mb-4
+          rounded-2xl
+          bg-white/70 backdrop-blur-xl
+          border border-white/40
+          shadow-[0_10px_30px_rgba(0,0,0,0.08)]
         "
       >
-        {/* View controls (desktop-first, hide on mobile) */}
-        <div className="hidden sm:flex gap-2">
-          <button className="px-2 py-1 bg-white rounded text-sm">
-            ≡
-          </button>
-          <button className="px-2 py-1 bg-white rounded text-sm">
-            ☰
-          </button>
-          <button className="px-2 py-1 bg-white rounded text-sm">
-            ▤
-          </button>
+        {/* LEFT: Tabs */}
+        <div className="flex-1 min-w-0">
+          <TemplateTabs />
         </div>
 
-        {/* Preset switcher */}
-        <div
-          className="
-            flex items-center gap-2
-            order-1 sm:order-none
-            mx-auto sm:mx-0
-          "
-        >
-          <button
-            onClick={prevPreset}
-            className="px-2 py-1 bg-white rounded"
-            aria-label="Previous preset"
-          >
-            ◀
-          </button>
+        {/* DIVIDER */}
+        <div className="hidden sm:block h-8 w-px bg-slate-300/60" />
 
-          <span className="text-sm font-medium max-w-[140px] truncate text-center">
-            {menu.meta.templateName}
-          </span>
-
-          <button
-            onClick={nextPreset}
-            className="px-2 py-1 bg-white rounded"
-            aria-label="Next preset"
-          >
-            ▶
-          </button>
-        </div>
-
-        {/* Actions */}
-        <div className="flex gap-2">
+        {/* RIGHT: Actions */}
+        <div className="flex items-center gap-2 shrink-0">
+          {/* QR */}
           <button
             onClick={openMenuQr}
             title="Scan to view menu"
             className="
-              px-2 py-2
-              bg-white rounded
+              h-10 w-10
+              rounded-xl
+              bg-white/80
+              border border-slate-200
+              hover:bg-white
+              shadow-sm
               flex items-center justify-center
+              transition-all
+              hover:scale-[1.04]
+              active:scale-[0.97]
             "
           >
             <IoQrCodeOutline size={18} />
           </button>
 
+          {/* PDF */}
           <button
             onClick={() => {
               const el =
@@ -114,13 +66,20 @@ export function PreviewToolbar() {
               if (el) exportMenuPDF(el);
             }}
             className="
-              px-3 py-2
-              bg-white rounded
-              text-sm font-medium
+              h-10 px-4
+              rounded-xl
+              bg-gradient-to-br from-slate-900 to-slate-800
+              text-white
+              text-sm font-semibold
+              shadow-md
+              hover:from-slate-800 hover:to-slate-700
+              transition-all
+              hover:scale-[1.03]
+              active:scale-[0.97]
               whitespace-nowrap
             "
           >
-            Download PDF
+            Export PDF
           </button>
         </div>
       </div>

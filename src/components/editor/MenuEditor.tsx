@@ -4,9 +4,14 @@ import { SectionsEditor } from "./SectionsEditor";
 import { useState } from "react";
 import { FaAnglesLeft, FaAnglesRight } from "react-icons/fa6";
 import { motion } from "motion/react";
+import { useMenuEditor } from "@/context/MenuEditorContext";
+import { TemplateControls } from "./TemplateControls";
+
+
 
 export function MenuEditor() {
   const [isOpen, setIsOpen] = useState(true);
+  const { mode, setMode } = useMenuEditor();
 
   return (
     <div className="relative flex">
@@ -23,25 +28,52 @@ export function MenuEditor() {
       >
         {isOpen && (
           <div className="space-y-6">
-            {/* Meta */}
-            <div className="bg-white rounded-2xl shadow-sm p-5">
-              <MenuMetaForm />
+            {/* Mode Toggle */}
+            <div className="flex justify-center">
+              <div className="flex bg-slate-200 rounded-lg p-1">
+                {(["menu", "template"] as const).map((m) => (
+                  <button
+                    key={m}
+                    onClick={() => setMode(m)}
+                    className={`
+                      px-4 py-1.5 text-sm rounded-md transition
+                      ${mode === m
+                        ? "bg-white shadow font-medium"
+                        : "opacity-70 hover:opacity-100"
+                      }
+                    `}
+                  >
+                    {m === "menu" ? "Menu" : "Template"}
+                  </button>
+                ))}
+              </div>
             </div>
 
-            {/* Theme */}
-            <div className="bg-white rounded-2xl shadow-sm p-5">
-              <ThemeControls />
-            </div>
+            {/* MENU MODE */}
+            {mode === "menu" && (
+              <>
+                <div className="bg-white rounded-2xl shadow-sm p-5">
+                  <MenuMetaForm />
+                </div>
 
-            {/* Sections */}
-            <div className="bg-white rounded-2xl shadow-sm p-5">
-              <SectionsEditor />
-            </div>
+                <div className="bg-white rounded-2xl shadow-sm p-5">
+                  <ThemeControls />
+                </div>
+
+                <div className="bg-white rounded-2xl shadow-sm p-5">
+                  <SectionsEditor />
+                </div>
+              </>
+            )}
+
+            {/* TEMPLATE MODE */}
+            {mode === "template" && <TemplateControls />}
+
           </div>
         )}
       </aside>
 
-      {/* Toggle */}
+      {/* Collapse Toggle */}
       <motion.button
         whileHover={{ scale: 1.08 }}
         whileTap={{ scale: 0.95 }}
