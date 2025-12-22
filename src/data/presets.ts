@@ -17,9 +17,12 @@ export const PRESETS: MenuPreset[] = [
       theme: {
         theme: "vintage",
         fontFamily: "serif",
-        layout: "single-column",
-        compactItems: true,
         accentColor: "#7a5c3e",
+
+        layout: "single-column",
+        density: "compact",
+        dividerStyle: "accent",
+        priceAlignment: "right",
       },
       sections: [
         {
@@ -82,9 +85,12 @@ export const PRESETS: MenuPreset[] = [
       theme: {
         theme: "elegant",
         fontFamily: "serif",
-        layout: "single-column",
-        compactItems: false,
         accentColor: "#b38b59",
+
+        layout: "single-column",
+        density: "comfortable",
+        dividerStyle: "line",
+        priceAlignment: "right",
       },
       sections: [
         {
@@ -147,9 +153,12 @@ export const PRESETS: MenuPreset[] = [
       theme: {
         theme: "bold",
         fontFamily: "sans",
-        layout: "single-column",
-        compactItems: true,
         accentColor: "#ff4d00",
+
+        layout: "single-column",
+        density: "compact",
+        dividerStyle: "none",
+        priceAlignment: "inline",
       },
       sections: [
         {
@@ -212,9 +221,12 @@ export const PRESETS: MenuPreset[] = [
       theme: {
         theme: "light",
         fontFamily: "sans",
-        layout: "single-column",
-        compactItems: false,
         accentColor: "#4a7c59",
+
+        layout: "single-column",
+        density: "comfortable",
+        dividerStyle: "line",
+        priceAlignment: "right",
       },
       sections: [
         {
