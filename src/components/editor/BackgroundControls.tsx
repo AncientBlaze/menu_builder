@@ -1,29 +1,34 @@
 // components/editor/BackgroundControls.tsx
 
 import { useMenuEditor } from "@/context/MenuEditorContext";
-import { uploadToCloudinary } from "@/utils/uploadImage";
+import { uploadImage } from "@/utils/upload";
 
 export function BackgroundControls() {
-  const { menu, setMenu } = useMenuEditor();
+  const { menu, updateMenu } = useMenuEditor();
   const bg = menu.visuals?.background;
 
   const updateBg = (patch: any) =>
-    updateMenu((m) => ({
-      ...m,
+    updateMenu({
       visuals: {
-        ...m.visuals,
+        ...menu.visuals,
         background: {
-          ...m.visuals?.background,
+          ...menu.visuals?.background,
           ...patch,
         },
       },
-    }));
+    });
 
   return (
     <div className="space-y-4">
       <select
         value={bg?.type ?? "none"}
-        onChange={(e) => updateBg({ type: e.target.value })}
+        onChange={(e) =>
+          updateBg({
+            type: e.target.value,
+            previewUrl: "",
+            url: "",
+          })
+        }
         className="w-full rounded border px-3 py-2"
       >
         <option value="none">None</option>
@@ -33,30 +38,38 @@ export function BackgroundControls() {
 
       {bg?.type !== "none" && (
         <>
-          {/* Local preview */}
           <input
             type="file"
             accept="image/*"
             onChange={(e) => {
               const file = e.target.files?.[0];
               if (!file) return;
-              const url = URL.createObjectURL(file);
-              updateBg({ url });
+
+              const previewUrl = URL.createObjectURL(file);
+
+              updateBg({
+                previewUrl,
+              });
             }}
           />
-
-          {/* Upload */}
           <button
             onClick={async () => {
               const fileInput = document.createElement("input");
               fileInput.type = "file";
               fileInput.accept = "image/*";
+
               fileInput.onchange = async () => {
                 const file = fileInput.files?.[0];
                 if (!file) return;
-                const url = await uploadToCloudinary(file);
-                updateBg({ url });
+
+                const cloudUrl = await uploadImage(file);
+
+                updateBg({
+                  url: cloudUrl,  
+                  previewUrl: "",
+                });
               };
+
               fileInput.click();
             }}
             className="px-3 py-2 bg-black text-white rounded"
@@ -64,7 +77,6 @@ export function BackgroundControls() {
             Upload to Cloudinary
           </button>
 
-          {/* Overlay */}
           <input
             type="range"
             min={0}

@@ -18,46 +18,44 @@ export interface MenuMeta {
    Visuals
 ===================== */
 
-export type LogoPosition =
-  | "top"
-  | "bottom"
-  | "overlay";
-
-export type LogoAlign =
-  | "left"
-  | "center"
-  | "right";
-
-export type BackgroundType =
-  | "none"
-  | "image"
-  | "animated";
+export type LogoPosition = "top" | "bottom" | "overlay";
+export type LogoAlign = "left" | "center" | "right";
+export type BackgroundType = "none" | "image" | "animated";
 
 /* ---------------------
    Visual Config
 --------------------- */
+
 export interface MenuVisuals {
   logo?: {
     url: string;
-    position: "top" | "bottom" | "overlay";
-    align: "left" | "center" | "right";
+    position: LogoPosition;
+    align: LogoAlign;
     size: number;
 
-    // NEW (only used if overlay)
+    /** Only used when position === "overlay" */
     offset?: {
-      x: number; // px
-      y: number; // px
+      x: number;
+      y: number;
     };
   };
 
   background?: {
-    type: "none" | "image" | "animated";
+    type: BackgroundType;
+
+    /** Cloud / persisted URL (QR, mobile, shared) */
     url?: string;
+
+    /** Local blob URL (editor only) */
+    previewUrl?: string;
+
     overlay?: {
       color: string;
       opacity: number;
     };
+
     exportMode?: {
+      /** Freeze GIF on PDF export */
       freezeAnimation: boolean;
     };
   };

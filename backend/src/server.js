@@ -2,12 +2,23 @@ import express from "express";
 import cors from "cors";
 import 'dotenv/config';
 import { connectDB } from "./Config/ConnectDb.js";
+import uploadRouter from "./Route/upload.js";
 import UserRoute from "./Route/UserRoute.js";
 import TemplateRoute from "./Route/TemplateRoute.js";
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+app.use((err, _, res, next) => {
+  if (err?.name === "MulterError") {
+    return res.status(400).json({
+      error: err.message,
+    });
+  }
+  next(err);
+});
 
 const menus = new Map();
 
@@ -25,6 +36,8 @@ app.get("/menu/:id", (req, res) => {
   res.json(menu);
 });
 
+
+app.use("/upload", uploadRouter);
 app.use("/user", UserRoute);
 app.use("/template", TemplateRoute);
 

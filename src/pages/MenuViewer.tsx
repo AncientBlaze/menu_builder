@@ -1,17 +1,30 @@
 import { useParams } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { fetchMenu } from "@/utils/api";
-import { MenuDocument } from "@/types/menu";
 import { MenuPreview } from "@/components/preview/MenuPreview";
 import { useMenuEditor } from "@/context/MenuEditorContext";
 
 export default function MenuViewer() {
   const { id } = useParams({ strict: false });
-  const { setMenu } = useMenuEditor();
 
-  const [menu, setLocalMenu] = useState<MenuDocument | null>(null);
+  const {
+    updateMenu,
+    setRenderMode,
+  } = useMenuEditor();
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+
+
+  useEffect(() => {
+    setRenderMode("qr");
+
+    return () => {
+      setRenderMode("editor");
+    };
+  }, []);
+
+  
 
   useEffect(() => {
     if (!id) {
@@ -24,20 +37,17 @@ export default function MenuViewer() {
     setError(false);
 
     fetchMenu(id)
-      .then((m) => {
-        setLocalMenu(m);
-        updateMenu(m); // keep MenuPreview working
+      .then((menu) => {
+        updateMenu(() => menu);
       })
       .catch(() => {
         setError(true);
-        setLocalMenu(null);
       })
       .finally(() => {
         setLoading(false);
       });
-  }, [id, setMenu]);
+  }, [id]);
 
-  /* 🌀 Loading */
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center px-4">
@@ -48,8 +58,7 @@ export default function MenuViewer() {
     );
   }
 
-  /* ❌ Error */
-  if (error || !menu) {
+  if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center px-6 text-center">
         <div>
@@ -64,16 +73,20 @@ export default function MenuViewer() {
     );
   }
 
-  /* ✅ Success */
+
   return (
-    <div className="min-h-screen bg-gray-50 flex justify-center">
+    <div className="min-h-screen bg-black flex justify-center">
       <div className="w-full max-w-md sm:max-w-lg md:max-w-xl px-3 py-4">
         <MenuPreview />
-        {/* <div className="flex justify-center items-center bg-emerald-200">
-        <button className="px-2 py-5 bg-red-500 rounded-xl ">
-          Order Now
-        </button>
-        </div> */}
+
+        {/* Optional CTA */}
+        {/* 
+        <div className="mt-4 flex justify-center">
+          <button className="px-6 py-3 rounded-xl bg-emerald-500 text-white font-semibold">
+            Order Now
+          </button>
+        </div>
+        */}
       </div>
     </div>
   );

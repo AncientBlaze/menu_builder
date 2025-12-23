@@ -30,7 +30,6 @@ export async function generateMenuPdfBlob(
   const pageHeight = pdf.internal.pageSize.getHeight();
 
   const imgWidth = pageWidth;
-  const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
   const pageHeightPx = Math.round(
     (canvas.width * pageHeight) / pageWidth

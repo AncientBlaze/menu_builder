@@ -57,34 +57,36 @@ export function PresetPreview({
     >
       {/* SCALE WRAPPER */}
       <div
-        className="origin-top-left"
-        style={{
-          transform: "scale(0.25)",
-          width: "400%",
-        }}
+        // className="origin-top-left"
+        // style={{
+        //   transform: "scale(0.25)",
+        //   width: "400%",
+        // }}
       >
         {/* PREVIEW CANVAS */}
         <div
           className={clsx(
-            "relative p-6 min-h-[300px]",
+            "relative p-6 min-h-[300px] overflow-hidden",
             themeClasses[theme.theme]
           )}
-          style={{
-            fontFamily: fontCss,
-            backgroundImage: bgImage
-              ? `url(${bgImage})`
-              : undefined,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}
+          style={{ fontFamily: fontCss }}
         >
+          {/* BACKGROUND IMAGE (GIF SAFE) */}
+          {bgImage && (
+            <img
+              src={bgImage}
+              alt=""
+              className="absolute inset-0 w-full h-full object-cover"
+              draggable={false}
+            />
+          )}
+
           {/* Background overlay */}
           {bgImage && (
             <div
               className="absolute inset-0"
               style={{
-                backgroundColor:
-                  bg?.overlay?.color ?? "#000000",
+                backgroundColor: bg?.overlay?.color ?? "#000000",
                 opacity: bg?.overlay?.opacity ?? 0.25,
               }}
             />
@@ -98,9 +100,8 @@ export function PresetPreview({
                 <img
                   src={logo.url}
                   alt="Logo"
-                  style={{
-                    height: logo.size ?? 48,
-                  }}
+                  style={{ height: logo.size ?? 48 }}
+                  className="object-contain"
                 />
               </div>
             )}
@@ -117,7 +118,7 @@ export function PresetPreview({
               )}
             </div>
 
-            {/* SECTIONS (lightweight) */}
+            {/* SECTIONS */}
             <div className="space-y-3">
               {sections.slice(0, 2).map((s) => (
                 <div key={s.id}>
@@ -138,9 +139,7 @@ export function PresetPreview({
                       key={i.id}
                       className="flex justify-between text-xs opacity-90"
                     >
-                      <span className="truncate">
-                        {i.name}
-                      </span>
+                      <span className="truncate">{i.name}</span>
                       <span>
                         {meta.currency}
                         {i.price}
@@ -157,9 +156,8 @@ export function PresetPreview({
                 <img
                   src={logo.url}
                   alt="Logo"
-                  style={{
-                    height: logo.size ?? 48,
-                  }}
+                  style={{ height: logo.size ?? 48 }}
+                  className="object-contain"
                 />
               </div>
             )}
@@ -171,12 +169,11 @@ export function PresetPreview({
               src={logo.url}
               alt="Logo"
               className="absolute bottom-4 right-4 opacity-80"
-              style={{
-                height: (logo.size ?? 48) * 0.9,
-              }}
+              style={{ height: (logo.size ?? 48) * 0.9 }}
             />
           )}
         </div>
+
       </div>
     </div>
   );

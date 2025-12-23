@@ -4,10 +4,17 @@ import clsx from "clsx";
 import { DraggableLogo } from "./DraggableLogo";
 
 export function MenuPreview() {
-  const { menu, exportMode } = useMenuEditor();
+  const { menu, renderMode } = useMenuEditor();
 
-  const { theme, fontFamily, layout, density, dividerStyle, priceAlignment, accentColor } =
-    menu.theme;
+  const {
+    theme,
+    fontFamily,
+    layout,
+    density,
+    dividerStyle,
+    priceAlignment,
+    accentColor,
+  } = menu.theme;
 
   const visuals = menu.visuals;
   const logo = visuals?.logo;
@@ -21,15 +28,17 @@ export function MenuPreview() {
     GOOGLE_FONTS.find((f) => f.value === fontFamily)?.css ?? "serif";
 
   /* -----------------------
-     Background logic
+     Background (SAFE)
   ----------------------- */
 
-  const showBackground = bg?.type !== "none" && bg?.url;
+  // ✅ previewUrl for editor, url for QR/mobile
+  const bgUrl =
+    bg?.previewUrl ||
+    bg?.url ||
+    null;
 
-  const backgroundUrl =
-    exportMode && bg?.exportMode?.freezeAnimation !== false
-      ? bg?.url
-      : bg?.url;
+  const showBackground =
+    bg?.type !== "none" && typeof bgUrl === "string";
 
   /* -----------------------
      Layout helpers
@@ -74,27 +83,33 @@ export function MenuPreview() {
         "max-w-md sm:max-w-lg md:max-w-xl lg:max-w-3xl",
         themeClasses[theme]
       )}
-      style={{
-        fontFamily: fontCss,
-        backgroundImage: showBackground ? `url(${backgroundUrl})` : undefined,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundAttachment: exportMode ? "scroll" : "fixed",
-      }}
+      style={{ fontFamily: fontCss }}
     >
-      {/* Background overlay */}
-      {showBackground && bg?.overlay && (
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundColor: bg.overlay.color,
-            opacity: bg.overlay.opacity,
-          }}
-        />
+      {/* ───────────────── BACKGROUND MEDIA ───────────────── */}
+      {showBackground && (
+        <div className="absolute inset-0 z-0">
+          <img
+            src={bgUrl}
+            alt=""
+            className="w-full h-full object-cover"
+            draggable={false}
+          />
+
+          {/* Overlay */}
+          {bg?.overlay && (
+            <div
+              className="absolute inset-0"
+              style={{
+                backgroundColor: bg.overlay.color,
+                opacity: bg.overlay.opacity,
+              }}
+            />
+          )}
+        </div>
       )}
 
-      {/* CONTENT */}
-      <div className="relative p-4 sm:p-6 md:p-8 lg:p-10">
+      {/* ───────────────── CONTENT ───────────────── */}
+      <div className="relative z-10 p-4 sm:p-6 md:p-8 lg:p-10">
         {/* LOGO TOP */}
         {logo?.url && logo.position === "top" && (
           <div
@@ -150,7 +165,9 @@ export function MenuPreview() {
                 )}
                 style={{
                   borderColor:
-                    dividerStyle === "accent" ? accentColor : undefined,
+                    dividerStyle === "accent"
+                      ? accentColor
+                      : undefined,
                 }}
               >
                 {section.title}
@@ -174,7 +191,9 @@ export function MenuPreview() {
                         <span
                           className={clsx(
                             "w-2 h-2 rounded-full",
-                            item.isVeg ? "bg-green-600" : "bg-red-600"
+                            item.isVeg
+                              ? "bg-green-600"
+                              : "bg-red-600"
                           )}
                         />
                       </div>
@@ -216,8 +235,8 @@ export function MenuPreview() {
         )}
       </div>
 
-      {/* LOGO OVERLAY */}
-      <DraggableLogo/>
+      {/* LOGO OVERLAY (EDITOR ONLY) */}
+      {renderMode === "editor" && <DraggableLogo />}
     </div>
   );
 }

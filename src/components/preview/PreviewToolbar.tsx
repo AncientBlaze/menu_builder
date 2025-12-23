@@ -2,25 +2,39 @@ import { useState } from "react";
 import { useMenuEditor } from "@/context/MenuEditorContext";
 import { exportMenuPDF } from "@/utils/pdf";
 import { QrPreviewModal } from "../QrPreviewModal";
-import { IoQrCodeOutline, IoMoonOutline, IoSunnyOutline } from "react-icons/io5";
+import {
+  IoQrCodeOutline,
+  IoMoonOutline,
+  IoSunnyOutline,
+} from "react-icons/io5";
 import { publishMenu } from "@/utils/api";
 import { TemplateTabs } from "./TemplateTabs";
-import clsx from "clsx"
+import clsx from "clsx";
 
 export function PreviewToolbar() {
   const {
     menu,
     editorTheme,
     toggleEditorTheme,
+    saveActivePage,
+    pages,
+    activePageId,
+    setRenderMode,
   } = useMenuEditor();
 
   const [qrValue, setQrValue] = useState<string | null>(null);
-  const { saveActivePage, pages, activePageId } = useMenuEditor();
-  const activePage = pages.find(p => p.id === activePageId);
+
+  const activePage = pages.find((p) => p.id === activePageId);
 
   const openMenuQr = async () => {
     const { id } = await publishMenu(menu);
+    setRenderMode("qr");
     setQrValue(`${window.location.origin}/menu/${id}`);
+  };
+
+  const closeQr = () => {
+    setQrValue(null);
+    setRenderMode("editor");
   };
 
   return (
@@ -47,7 +61,7 @@ export function PreviewToolbar() {
 
         {/* RIGHT: Actions */}
         <div className="flex items-center gap-2 shrink-0">
-          {/* Save Button */}
+          {/* Save */}
           <button
             onClick={saveActivePage}
             disabled={!activePage?.isDirty}
@@ -60,6 +74,7 @@ export function PreviewToolbar() {
           >
             Save
           </button>
+
           {/* Theme toggle */}
           <button
             onClick={toggleEditorTheme}
@@ -104,9 +119,13 @@ export function PreviewToolbar() {
 
           {/* PDF */}
           <button
-            onClick={() => {
+            onClick={async () => {
               const el = document.getElementById("menu-preview");
-              if (el) exportMenuPDF(el);
+              if (!el) return;
+              setRenderMode("export");
+              await exportMenuPDF(el).finally(() =>
+                setRenderMode("editor")
+              );
             }}
             className="
               h-10 px-4
@@ -130,10 +149,7 @@ export function PreviewToolbar() {
       </div>
 
       {qrValue && (
-        <QrPreviewModal
-          value={qrValue}
-          onClose={() => setQrValue(null)}
-        />
+        <QrPreviewModal value={qrValue} onClose={closeQr} />
       )}
     </>
   );

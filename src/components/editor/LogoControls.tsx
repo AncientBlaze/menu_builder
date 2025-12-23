@@ -2,15 +2,14 @@ import { useMenuEditor } from "@/context/MenuEditorContext";
 import clsx from "clsx";
 
 export function LogoControls() {
-  const { menu, setMenu } = useMenuEditor();
+  const { menu, updateMenu } = useMenuEditor();
 
   const logo = menu.visuals?.logo;
 
   const updateLogo = (patch: Partial<typeof logo>) => {
-    updateMenu((m) => ({
-      ...m,
+    updateMenu({
       visuals: {
-        ...m.visuals,
+        ...menu.visuals,
         logo: {
           url: logo?.url ?? "",
           position: logo?.position ?? "top",
@@ -19,17 +18,16 @@ export function LogoControls() {
           ...patch,
         },
       },
-    }));
+    });
   };
 
   const removeLogo = () => {
-    updateMenu((m) => ({
-      ...m,
+    updateMenu({
       visuals: {
-        ...m.visuals,
+        ...menu.visuals,
         logo: undefined,
       },
-    }));
+    });
   };
 
   return (
