@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SignupRouteImport } from './routes/Signup'
 import { Route as LoginRouteImport } from './routes/Login'
+import { Route as LandingRouteImport } from './routes/Landing'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as MenuIdRouteImport } from './routes/menu/$id'
 
@@ -22,6 +23,11 @@ const SignupRoute = SignupRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/Login',
   path: '/Login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LandingRoute = LandingRouteImport.update({
+  id: '/Landing',
+  path: '/Landing',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -37,12 +43,14 @@ const MenuIdRoute = MenuIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/Landing': typeof LandingRoute
   '/Login': typeof LoginRoute
   '/Signup': typeof SignupRoute
   '/menu/$id': typeof MenuIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/Landing': typeof LandingRoute
   '/Login': typeof LoginRoute
   '/Signup': typeof SignupRoute
   '/menu/$id': typeof MenuIdRoute
@@ -50,20 +58,22 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/Landing': typeof LandingRoute
   '/Login': typeof LoginRoute
   '/Signup': typeof SignupRoute
   '/menu/$id': typeof MenuIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/Login' | '/Signup' | '/menu/$id'
+  fullPaths: '/' | '/Landing' | '/Login' | '/Signup' | '/menu/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/Login' | '/Signup' | '/menu/$id'
-  id: '__root__' | '/' | '/Login' | '/Signup' | '/menu/$id'
+  to: '/' | '/Landing' | '/Login' | '/Signup' | '/menu/$id'
+  id: '__root__' | '/' | '/Landing' | '/Login' | '/Signup' | '/menu/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  LandingRoute: typeof LandingRoute
   LoginRoute: typeof LoginRoute
   SignupRoute: typeof SignupRoute
   MenuIdRoute: typeof MenuIdRoute
@@ -85,6 +95,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/Landing': {
+      id: '/Landing'
+      path: '/Landing'
+      fullPath: '/Landing'
+      preLoaderRoute: typeof LandingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -104,6 +121,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  LandingRoute: LandingRoute,
   LoginRoute: LoginRoute,
   SignupRoute: SignupRoute,
   MenuIdRoute: MenuIdRoute,

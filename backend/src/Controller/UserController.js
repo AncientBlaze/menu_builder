@@ -2,8 +2,8 @@ import User from "../Model/User.js";
 import { comparePassword, generatePassword } from "../Utils/bcryptFile.js";
 
 export const Signup = async (req, res) => {
-    const { name, email, password, resturent_name } = req.body;
-    if (!name || !email || !password || !resturent_name) {
+    const { name, email, password, restaurant_name } = req.body;
+    if (!name || !email || !password || !restaurant_name) {
         return res.status(400).json({ error: "All fields are required" });
     };
 
@@ -16,7 +16,7 @@ export const Signup = async (req, res) => {
             name,
             email,
             password: hashPassword,
-            resturent_name
+            restaurant_name
         });
 
         await newUser.save();
@@ -41,7 +41,7 @@ export const Login = async (req, res) => {
             _id: user._id,
             name: user.name,
             email: user.email,
-            resturent_name: user.resturent_name
+            restaurant_name: user.restaurant_name
         };
         return res.status(200).json({ message: "Login successful", user: UserDetails });
     } catch (error) {

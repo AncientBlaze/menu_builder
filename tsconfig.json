@@ -1,5 +1,5 @@
 {
-  "include": ["**/*.ts", "**/*.tsx", "tailwind.config.js", "backend/src/Route/upload.js", "backend/src/Utils/cloudinary.js", "src/utils/upload.ts"],
+  "include": ["**/*.ts", "**/*.tsx", "tailwind.config.js", "backend/src/Route/upload.js", "backend/src/Utils/cloudinary.js", "src/utils/upload.ts", "src/utils/auth.ts"],
   "compilerOptions": {
     "target": "ES2022",
     "jsx": "react-jsx",

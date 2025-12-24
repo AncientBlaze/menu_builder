@@ -9,7 +9,9 @@ import {
 } from "react-icons/io5";
 import { publishMenu } from "@/utils/api";
 import { TemplateTabs } from "./TemplateTabs";
+import { motion } from "motion/react";
 import clsx from "clsx";
+import { toast } from "react-hot-toast";
 
 export function PreviewToolbar() {
   const {
@@ -27,9 +29,15 @@ export function PreviewToolbar() {
   const activePage = pages.find((p) => p.id === activePageId);
 
   const openMenuQr = async () => {
-    const { id } = await publishMenu(menu);
-    setRenderMode("qr");
-    setQrValue(`${window.location.origin}/menu/${id}`);
+    try {
+      const { id } = await publishMenu(menu);
+      setRenderMode("qr");
+      setQrValue(`${window.location.origin}/menu/${id}`);
+      toast.success("QR code generated!");
+    } catch (error) {
+      toast.error("Failed to generate QR code");
+      console.error(error);
+    }
   };
 
   const closeQr = () => {
@@ -39,17 +47,20 @@ export function PreviewToolbar() {
 
   return (
     <>
-      <div
-        className="
+      <motion.div
+        className={`
           relative
           flex items-center gap-4
-          px-4 py-3
-          rounded-2xl
-          bg-white/70 dark:bg-slate-900/70
+          px-5 py-3.5
+          rounded-xl
+          transition-all duration-300
+          ${editorTheme === "dark"
+            ? "bg-slate-800/60 border border-slate-700/50 shadow-lg shadow-slate-900/30"
+            : "bg-white/70 border border-slate-200/60 shadow-lg shadow-slate-200/30"
+          }
           backdrop-blur-xl
-          border border-slate-200/60 dark:border-slate-700/60
-          shadow-[0_10px_30px_rgba(0,0,0,0.08)]
-        "
+        `}
+        layout
       >
         {/* LEFT: Tabs */}
         <div className="flex-1 min-w-0">
@@ -57,96 +68,122 @@ export function PreviewToolbar() {
         </div>
 
         {/* Divider */}
-        <div className="hidden sm:block h-8 w-px bg-slate-300/60 dark:bg-slate-700/60" />
+        <motion.div
+          className={`
+            hidden sm:block h-8 w-px
+            transition duration-300
+            ${editorTheme === "dark"
+              ? "bg-slate-600/40"
+              : "bg-slate-300/60"
+            }
+          `}
+        />
 
         {/* RIGHT: Actions */}
-        <div className="flex items-center gap-2 shrink-0">
-          {/* Save */}
-          <button
+        <div className="flex items-center gap-2.5 shrink-0">
+          {/* Save Button */}
+          <motion.button
+            whileHover={{ scale: activePage?.isDirty ? 1.04 : 1 }}
+            whileTap={{ scale: activePage?.isDirty ? 0.97 : 1 }}
             onClick={saveActivePage}
             disabled={!activePage?.isDirty}
             className={clsx(
-              "h-10 px-4 rounded-xl text-sm font-semibold transition",
+              "h-10 px-4 rounded-lg text-sm font-semibold transition duration-300 flex items-center gap-2",
               activePage?.isDirty
-                ? "bg-green-600 hover:bg-green-500 text-white"
-                : "bg-slate-300 text-slate-500 cursor-not-allowed"
+                ? editorTheme === "dark"
+                  ? "bg-gradient-to-br from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 text-white shadow-lg shadow-green-500/30"
+                  : "bg-gradient-to-br from-green-500 to-green-600 hover:from-green-400 hover:to-green-500 text-white shadow-md shadow-green-300/50"
+                : editorTheme === "dark"
+                ? "bg-slate-700/50 text-slate-400 cursor-not-allowed"
+                : "bg-slate-200 text-slate-400 cursor-not-allowed"
             )}
           >
-            Save
-          </button>
+            💾 Save
+          </motion.button>
 
           {/* Theme toggle */}
-          <button
+          <motion.button
+            whileHover={{ scale: 1.08, rotate: 10 }}
+            whileTap={{ scale: 0.95, rotate: -5 }}
             onClick={toggleEditorTheme}
-            title="Toggle editor theme"
-            className="
+            title={`Switch to ${editorTheme === "dark" ? "light" : "dark"} mode`}
+            className={`
               h-10 w-10
-              rounded-xl
+              rounded-lg
               flex items-center justify-center
-              bg-white dark:bg-slate-800
-              border border-slate-300 dark:border-slate-700
-              text-slate-700 dark:text-slate-200
-              hover:bg-slate-100 dark:hover:bg-slate-700
-              transition
-            "
+              transition duration-300
+              ${editorTheme === "dark"
+                ? "bg-slate-700/60 border border-slate-600/50 text-yellow-400 hover:bg-slate-600/80 shadow-lg shadow-slate-900/30"
+                : "bg-slate-100/80 border border-slate-300/60 text-indigo-600 hover:bg-slate-200/80 shadow-md shadow-slate-300/30"
+              }
+            `}
           >
             {editorTheme === "dark" ? (
               <IoSunnyOutline size={18} />
             ) : (
               <IoMoonOutline size={18} />
             )}
-          </button>
+          </motion.button>
 
           {/* QR */}
-          <button
+          <motion.button
+            whileHover={{ scale: 1.08 }}
+            whileTap={{ scale: 0.95 }}
             onClick={openMenuQr}
-            title="Scan to view menu"
-            className="
+            title="Generate QR code to view menu"
+            className={`
               h-10 w-10
-              rounded-xl
+              rounded-lg
               flex items-center justify-center
-              bg-white dark:bg-slate-800
-              border border-slate-300 dark:border-slate-700
-              text-slate-700 dark:text-slate-200
-              hover:bg-slate-100 dark:hover:bg-slate-700
-              transition
-              hover:scale-[1.04]
-              active:scale-[0.97]
-            "
+              transition duration-300
+              ${editorTheme === "dark"
+                ? "bg-slate-700/60 border border-slate-600/50 text-blue-400 hover:bg-slate-600/80 shadow-lg shadow-slate-900/30 hover:shadow-lg hover:shadow-blue-500/20"
+                : "bg-slate-100/80 border border-slate-300/60 text-blue-600 hover:bg-slate-200/80 shadow-md shadow-slate-300/30 hover:shadow-md hover:shadow-blue-300/50"
+              }
+            `}
           >
             <IoQrCodeOutline size={18} />
-          </button>
+          </motion.button>
 
-          {/* PDF */}
-          <button
+          {/* PDF Export */}
+          <motion.button
+            whileHover={{ scale: 1.06 }}
+            whileTap={{ scale: 0.95 }}
             onClick={async () => {
               const el = document.getElementById("menu-preview");
-              if (!el) return;
-              setRenderMode("export");
-              await exportMenuPDF(el).finally(() =>
-                setRenderMode("editor")
-              );
+              if (!el) {
+                toast.error("Menu not found");
+                return;
+              }
+              try {
+                setRenderMode("export");
+                await exportMenuPDF(el);
+                toast.success("PDF exported successfully!");
+              } catch (error) {
+                toast.error("Failed to export PDF");
+                console.error(error);
+              } finally {
+                setRenderMode("editor");
+              }
             }}
-            className="
-              h-10 px-4
-              rounded-xl
+            className={`
+              h-10 px-5
+              rounded-lg
               text-sm font-semibold
-              text-white
-              bg-gradient-to-br from-slate-900 to-slate-800
-              dark:from-slate-100 dark:to-slate-200
-              dark:text-slate-900
-              shadow-md
-              hover:opacity-90
-              transition
-              hover:scale-[1.03]
-              active:scale-[0.97]
+              transition duration-300
+              flex items-center gap-2
               whitespace-nowrap
-            "
+              shadow-lg
+              ${editorTheme === "dark"
+                ? "bg-gradient-to-br from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white shadow-red-500/30 hover:shadow-lg hover:shadow-red-500/40"
+                : "bg-gradient-to-br from-red-500 to-red-600 hover:from-red-400 hover:to-red-500 text-white shadow-red-300/50 hover:shadow-lg hover:shadow-red-400/60"
+              }
+            `}
           >
-            Export PDF
-          </button>
+            📄 Export
+          </motion.button>
         </div>
-      </div>
+      </motion.div>
 
       {qrValue && (
         <QrPreviewModal value={qrValue} onClose={closeQr} />

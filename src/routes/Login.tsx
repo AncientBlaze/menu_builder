@@ -1,69 +1,184 @@
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { useState } from 'react'
+import axios from 'axios'
+import { login } from '@/utils/api'
+import toast from 'react-hot-toast'
+import { IoEye, IoEyeOff } from 'react-icons/io5'
+import { ModalLoader } from '@/components/Loader'
 
+export const Route = createFileRoute('/Login')({
+  component: Login,
+})
 
-import { createFileRoute, useNavigate, redirect } from "@tanstack/react-router";
-import { useMutation } from "@tanstack/react-query";
-import { useState } from "react";
-
-export const Route = createFileRoute("/Login")({
-    beforeLoad: () => {
-        throw redirect({to: "/"})
-    },
-    component: LoginRoute,
-});
-
-function LoginRoute() {
-    const navigate = useNavigate();
-    const [form, setForm] = useState({ email: "", password: "" });
-
-    const loginMutation = useMutation({
-        mutationFn: async (data: { email: string; password: string }) => {
-            await new Promise((r) => setTimeout(r, 800));
-            return { email: data.email };
-        },
-        onSuccess: () => {
-            navigate({ to: "/" });
-        },
-    });
-
-    return (
-        <div className="flex min-h-screen items-center justify-center px-4">
-            <div className="w-full max-w-md rounded-2xl bg-white/5 p-8 backdrop-blur border border-white/10">
-                <h1 className="text-3xl font-bold text-white mb-6 text-center">
-                    Login
-                </h1>
-
-                <form
-                    onSubmit={(e) => {
-                        e.preventDefault();
-                        loginMutation.mutate(form);
-                    }}
-                    className="space-y-4"
-                >
-                    <input
-                        className="w-full rounded-lg bg-zinc-900 border border-zinc-700 px-4 py-2 text-white"
-                        placeholder="Email"
-                        onChange={(e) => setForm({ ...form, email: e.target.value })}
-                    />
-
-                    <input
-                        type="password"
-                        className="w-full rounded-lg bg-zinc-900 border border-zinc-700 px-4 py-2 text-white"
-                        placeholder="Password"
-                        onChange={(e) => setForm({ ...form, password: e.target.value })}
-                    />
-
-                    {loginMutation.isError && (
-                        <p className="text-red-400 text-sm">
-                            {(loginMutation.error as Error).message}
-                        </p>
-                    )}
-
-                    <button className="w-full rounded-lg bg-indigo-600 py-2 text-white font-semibold">
-                        {loginMutation.isPending ? "Logging in…" : "Login"}
-                    </button>
-                </form>
-            </div>
-        </div>
-    );
+interface LoginFormData {
+  email: string
+  password: string
 }
 
+interface LoginError {
+  field?: keyof LoginFormData
+  message: string
+}
+
+function Login() {
+  const navigate = useNavigate()
+  const [formData, setFormData] = useState<LoginFormData>({
+    email: '',
+    password: '',
+  })
+  const [errors, setErrors] = useState<LoginError[]>([])
+  const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+
+  const validateForm = (): boolean => {
+    const newErrors: LoginError[] = []
+
+    if (!formData.email.trim()) {
+      newErrors.push({ field: 'email', message: 'Email is required' })
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.push({ field: 'email', message: 'Invalid email format' })
+    }
+
+    if (!formData.password) {
+      newErrors.push({ field: 'password', message: 'Password is required' })
+    }
+
+    setErrors(newErrors)
+    return newErrors.length === 0
+  }
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    setFormData(prev => ({
+      ...prev,
+      [name]: value,
+    }))
+    setErrors(prev => prev.filter(err => err.field !== name))
+  }
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+
+    if (!validateForm()) {
+      return
+    }
+
+    setLoading(true)
+    try {
+      const response = await login(formData)
+      
+      // Store user info in localStorage
+      if (response.user) {
+        localStorage.setItem('user', JSON.stringify(response.user))
+      }
+      
+      toast.success('Login successful!')
+      setTimeout(() => {
+        navigate({ to: '/' })
+      }, 1500)
+    } catch (error) {
+      const errorMsg = axios.isAxiosError(error) && error.response?.data?.error
+        ? error.response.data.error
+        : 'An error occurred during login. Please try again.'
+      toast.error(errorMsg)
+      setErrors([{ message: errorMsg }])
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const getFieldError = (field: keyof LoginFormData): string | undefined => {
+    return errors.find(err => err.field === field)?.message
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 flex items-center justify-center px-4 py-8">
+      <div className="w-full max-w-md bg-white rounded-xl shadow-xl hover:shadow-2xl border border-gray-200/50 p-8 transition duration-300 backdrop-blur-sm bg-white/95">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent text-center mb-2">Welcome Back</h1>
+          <p className="text-gray-600 text-center text-sm">Sign in to your account</p>
+          <div className="h-1 w-12 bg-gradient-to-r from-blue-600 to-blue-700 rounded-full mx-auto mt-4"></div>
+        </div>
+
+        {loading && <ModalLoader message="Signing you in..." />}
+
+        {errors.length > 0 && (
+          <div className="mb-6 p-4 bg-red-50/80 border border-red-200/50 rounded-lg">
+            {errors.map((error, idx) => (
+              <p key={idx} className="text-red-700 text-sm">
+                {error.message}
+              </p>
+            ))}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+              Email Address
+            </label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition bg-white/50 hover:bg-white ${
+                getFieldError('email') ? 'border-red-500' : 'border-gray-300'
+              }`}
+              placeholder="your@email.com"
+              disabled={loading}
+            />
+          </div>
+
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+              Password
+            </label>
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                id="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                className={`w-full px-4 py-2.5 pr-10 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition bg-white/50 hover:bg-white ${
+                  getFieldError('password') ? 'border-red-500' : 'border-gray-300'
+                }`}
+                placeholder="Enter your password"
+                disabled={loading}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition"
+                tabIndex={-1}
+              >
+                {showPassword ? (
+                  <IoEyeOff size={20} />
+                ) : (
+                  <IoEye size={20} />
+                )}
+              </button>
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:shadow-lg hover:shadow-blue-200 disabled:from-blue-400 disabled:to-blue-500 text-white font-semibold py-2 rounded-lg transition duration-200 mt-6 hover:-translate-y-0.5 disabled:hover:translate-y-0"
+          >
+            {loading ? 'Signing in...' : 'Sign In'}
+          </button>
+        </form>
+
+        <p className="text-center text-gray-600 text-sm mt-8">
+          Don't have an account?{' '}
+          <a href="/Signup" className="text-blue-600 hover:text-blue-700 font-semibold hover:underline transition">
+            Create one here
+          </a>
+        </p>
+      </div>
+    </div>
+  )
+}

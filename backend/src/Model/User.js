@@ -5,7 +5,7 @@ const UserSchema = new Schema({
     email: { type: String, required: true },
     password: { type: String, required: true },
     prime: { type: Boolean, default: false},
-    resturent_name: { type: String, required: true },
+    restaurant_name: { type: String, required: true },
     // otp: { type: String, default: "" },
     // auth: { type: Boolean, default: false },
 }, {

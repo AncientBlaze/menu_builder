@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import 'dotenv/config';
-import { connectDB } from "./Config/ConnectDb.js";
+import { connectDB } from "./Config/ConnectDb.ts";
 import uploadRouter from "./Route/upload.js";
 import UserRoute from "./Route/UserRoute.js";
 import TemplateRoute from "./Route/TemplateRoute.js";
@@ -38,7 +38,7 @@ app.get("/menu/:id", (req, res) => {
 
 
 app.use("/upload", uploadRouter);
-app.use("/user", UserRoute);
+app.use("/auth/user", UserRoute);
 app.use("/template", TemplateRoute);
 
 await connectDB();
