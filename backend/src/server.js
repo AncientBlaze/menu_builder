@@ -39,7 +39,7 @@ app.get("/menu/:id", (req, res) => {
 
 app.use("/upload", uploadRouter);
 app.use("/auth/user", UserRoute);
-app.use("/template", TemplateRoute);
+app.use("/templates", TemplateRoute);
 
 await connectDB();
 app.listen(port, () => {

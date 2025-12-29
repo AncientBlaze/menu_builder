@@ -9,7 +9,7 @@ export function MenuPreview() {
   const {
     theme,
     fontFamily,
-    layout,
+    flow,
     density,
     dividerStyle,
     priceAlignment,
@@ -44,7 +44,7 @@ export function MenuPreview() {
      Layout helpers
   ----------------------- */
 
-  const isTwoColumn = layout === "two-column";
+  const isTwoColumn = flow === "two-column";
 
   const sectionSpacing =
     density === "compact" ? "mb-4 sm:mb-6" : "mb-6 sm:mb-8";
@@ -233,10 +233,8 @@ export function MenuPreview() {
             />
           </div>
         )}
-      </div>
-
-      {/* LOGO OVERLAY (EDITOR ONLY) */}
       {renderMode === "editor" && <DraggableLogo />}
+      </div>
     </div>
   );
 }

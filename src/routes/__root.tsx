@@ -55,7 +55,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         <Toaster position="top-right" reverseOrder={false} />
-        {isPublicRoute ? null : <Header/>}
+        {isPublicRoute ?? <Header/>}
         <QueryClientProvider client={queryClient}>
         {children}
         </QueryClientProvider>

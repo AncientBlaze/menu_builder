@@ -10,6 +10,7 @@ import { MenuDocument } from "@/types/menu";
 import { MenuPreset } from "@/types/preset";
 import { nanoid } from "nanoid";
 import { arrayMove } from "@/utils/reorder";
+import { templateStore } from "@/stores/templateStore";
 
 /* =====================
    Types
@@ -177,30 +178,50 @@ export function MenuEditorProvider({ children }: PropsWithChildren) {
   };
 
   const openPageFromPreset = (preset: MenuPreset) => {
-    setPages((prev) => {
-      const existing = prev.find((p) => p.id === preset.id);
-      if (existing) {
-        setActivePageId(existing.id);
-        setMenu(clone(existing.document));
-        return prev;
+  setPages((prev) => {
+    const existing = prev.find((p) => p.id === preset.id);
+
+    if (existing) {
+      setActivePageId(existing.id);
+      setMenu(clone(existing.document));
+
+      // 🔥 sync template if present
+      const templateId = existing.document.meta.templateId;
+      if (templateId) {
+        templateStore.setState((s) => ({
+          ...s,
+          activeTemplateId: templateId,
+        }));
       }
 
-      const doc = clone(preset.document);
-      setActivePageId(preset.id);
-      setMenu(doc);
+      return prev;
+    }
 
-      return [
-        ...prev,
-        {
-          id: preset.id,
-          name: preset.name,
-          document: doc,
-          savedDocument: clone(doc),
-          isDirty: false,
-        },
-      ];
-    });
-  };
+    const doc = clone(preset.document);
+
+    setActivePageId(preset.id);
+    setMenu(doc);
+
+    // 🔥 sync template if present
+    if (doc.meta.templateId) {
+      templateStore.setState((s) => ({
+        ...s,
+        activeTemplateId: doc.meta.templateId!,
+      }));
+    }
+
+    return [
+      ...prev,
+      {
+        id: preset.id,
+        name: preset.name,
+        document: doc,
+        savedDocument: clone(doc),
+        isDirty: false,
+      },
+    ];
+  });
+};
 
   const switchPage = (pageId: string) => {
     const page = pages.find((p) => p.id === pageId);

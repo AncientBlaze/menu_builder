@@ -1,11 +1,9 @@
 import axios from "axios";
 import { MenuDocument } from "@/types/menu";
+import { TemplateDocument } from "@/types/template";
 
 const api = axios.create({
   baseURL: "/api",
-  headers: {
-    "Content-Type": "application/json",
-  },
 });
 
 /**
@@ -45,5 +43,36 @@ export async function login(data: {
   password: string;
 }) {
   const res = await api.post("/auth/user/login", data);
+  return res.data;
+}
+
+
+/* ======================
+   TEMPLATES
+====================== */
+
+/**
+ * Save a template
+ */
+export async function saveTemplate(
+  template: TemplateDocument
+) {
+  const res = await api.post("/templates/create", template);
+  return res.data;
+}
+
+/**
+ * Fetch all templates (user + system)
+ */
+export async function fetchTemplates(): Promise<TemplateDocument[]> {
+  const res = await api.get("/templates/get");
+  return res.data;
+}
+
+/**
+ * Delete template
+ */
+export async function deleteTemplate(id: string) {
+  const res = await api.delete(`/templates/${id}`);
   return res.data;
 }

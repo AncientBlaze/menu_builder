@@ -7,7 +7,7 @@ import { BackgroundControls } from "./BackgroundControls";
    Template Controls
 ===================== */
 
-export function TemplateControls() {
+export function AppearanceControls() {
   const { menu, updateMenu } = useMenuEditor();
   const theme = menu.theme;
 
@@ -22,22 +22,22 @@ export function TemplateControls() {
   return (
     <div className="rounded-2xl p-5 space-y-8 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
       <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-400">
-        Template Settings
+        Appearance Settings
       </h3>
 
       {/* ───────────────── Layout ───────────────── */}
       <ControlGroup label="Layout" description="How sections flow across the page">
         <OptionRow>
           <OptionButton
-            active={theme.layout === "single-column"}
-            onClick={() => updateTheme({ layout: "single-column" })}
+            active={theme.flow === "single-column"}
+            onClick={() => updateTheme({ flow: "single-column" })}
           >
             Single column
           </OptionButton>
 
           <OptionButton
-            active={theme.layout === "two-column"}
-            onClick={() => updateTheme({ layout: "two-column" })}
+            active={theme.flow === "two-column"}
+            onClick={() => updateTheme({ flow: "two-column" })}
           >
             Two column
           </OptionButton>
@@ -119,9 +119,6 @@ export function TemplateControls() {
   );
 }
 
-/* =====================
-   UI Primitives
-===================== */
 
 function ControlGroup({
   label,

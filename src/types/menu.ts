@@ -10,7 +10,7 @@ export interface MenuMeta {
   address?: string;
   currency: CurrencyCode;
 
-  /** Which template this menu is based on */
+  templateId?: string;
   templateName?: string;
 }
 
@@ -38,15 +38,16 @@ export interface MenuVisuals {
       x: number;
       y: number;
     };
+
+    /** Styling effects */
+    borderRadius?: number; // 0-50 (percentage)
+    opacity?: number; // 0-100 (percentage)
+    shadow?: "none" | "soft" | "medium" | "hard";
   };
 
   background?: {
     type: BackgroundType;
-
-    /** Cloud / persisted URL (QR, mobile, shared) */
     url?: string;
-
-    /** Local blob URL (editor only) */
     previewUrl?: string;
 
     overlay?: {
@@ -55,7 +56,6 @@ export interface MenuVisuals {
     };
 
     exportMode?: {
-      /** Freeze GIF on PDF export */
       freezeAnimation: boolean;
     };
   };
@@ -107,7 +107,7 @@ export interface ThemeConfig {
   accentColor: string;
 
   /* Layout & behavior */
-  layout: LayoutType;
+  flow: LayoutType;
   density: Density;
   dividerStyle: DividerStyle;
   priceAlignment: PriceAlignment;
@@ -130,6 +130,7 @@ export interface MenuSection {
   title: string;
   items: MenuItem[];
 }
+
 
 /* =====================
    Root Document

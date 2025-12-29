@@ -90,21 +90,21 @@ function Landing() {
       </motion.nav>
 
       {/* Hero */}
-      <section className="relative max-w-6xl mx-auto px-6 py-24">
+      <section className="relative max-w-6xl mx-auto px-6 py-28">
         <motion.div
           initial="hidden"
           animate="visible"
           variants={containerVariants}
-          className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center"
+          className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center "
         >
           {/* Left Content */}
-          <motion.div variants={containerVariants}>
+          <motion.div variants={containerVariants} >
             <motion.h1
               variants={itemVariants}
               className="text-6xl lg:text-7xl font-black mb-8 text-gray-900 leading-tight"
             >
               Create Beautiful
-              <span className="block bg-gradient-to-r from-blue-600 via-blue-500 to-blue-700 bg-clip-text text-transparent"> Digital Menus</span>
+              <span className="block bg-gradient-to-r from-blue-600 via-blue-500 to-blue-700 bg-clip-text text-transparent py-4"> Digital Menus</span>
             </motion.h1>
             <motion.p
               variants={itemVariants}

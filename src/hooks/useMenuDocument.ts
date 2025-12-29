@@ -2,9 +2,6 @@ import { useState } from "react";
 import { MenuDocument } from "@/types/menu";
 import { nanoid } from "nanoid";
 
-/* =====================
-   Initial Menu Template
-===================== */
 
 export const initialMenu: MenuDocument = {
   meta: {
@@ -19,7 +16,7 @@ export const initialMenu: MenuDocument = {
     theme: "light",
     fontFamily: "Source Serif 4",
     accentColor: "#b38b59",
-    layout: "single-column",
+    flow: "single-column",
     density: "comfortable",
     dividerStyle: "line",
     priceAlignment: "right",
@@ -48,9 +45,7 @@ export const initialMenu: MenuDocument = {
   sections: [],
 };
 
-/* =====================
-   Hook
-===================== */
+
 
 export function useMenuDocument() {
   const [menu, setMenu] = useState<MenuDocument>(initialMenu);

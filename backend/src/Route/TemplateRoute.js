@@ -1,12 +1,19 @@
-import express from "express";
-import { createTemplate, deleteTemplate, getTemplate, getTemplates, UpdateTemplate } from "../Controller/TemplateController.js";
+import { Router } from "express";
+import {
+  createTemplate,
+  getTemplates,
+  getTemplate,
+  updateTemplate,
+  deleteTemplate,
+} from "../Controller/TemplateController.js";
 
-const router = express.Router();
+const router = Router();
 
-router.post("/createTemplate", createTemplate);
-router.get("/getTemplates/:id", getTemplates); // send user id in params
-router.get("/getTemplate/:id", getTemplate); // send template id in params
-router.put("/UpdateTemplate/:id", UpdateTemplate);
-router.delete("/deleteTemplate/:id", deleteTemplate);
+
+router.post("/create", createTemplate);
+router.get("/get", getTemplates);
+router.get("/:id", getTemplate);
+router.put("/:id", updateTemplate);
+router.delete("/:id", deleteTemplate);
 
 export default router;

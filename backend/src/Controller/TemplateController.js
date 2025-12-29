@@ -1,68 +1,122 @@
 import Template from "../Model/Template.js";
-import User from "../Model/User.js";
 
+/* =========================
+   CREATE TEMPLATE
+========================= */
 export const createTemplate = async (req, res) => {
-    const { user_id, template, prime } = req.body;
-    if (!user_id || !prime) return res.status(400).json({ error: "All fields are required" });
-    if (!template || typeof template !== "object") return res.status(400).json({ error: "Invalid template data" });
-    try {
-        const newTemplate = new Template({ user_id, template, prime });
-        await newTemplate.save();
-        return res.status(201).json({ message: "Template created successfully" });
-    } catch (error) {
-        return res.status(500).json({ error: error.message });
-    }
-}
+  try {
+    const userId = req.user.id;
+    const { name, document, isPrime = false } = req.body;
 
+    if (!name || !document || typeof document !== "object") {
+      return res.status(400).json({ error: "Invalid template data" });
+    }
+
+    const template = await Template.create({
+      user_id: userId,
+      name,
+      document,
+      category: "custom",
+      isPrime,
+    });
+    res.status(201).json(template);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+/* =========================
+   GET MY TEMPLATES
+========================= */
 export const getTemplates = async (req, res) => {
-    const { id } = req.params;
-    try {
-        const user = await User.findOne({ _id: id });
-        console.log(user);
-        if (!user) return res.status(404).json({ error: "User not found" });
+  try {
+    const userId = req.user.id;
 
-        const template = await Template.find({ user_id: id }).populate("user_id", "-password");
-        if (!template) return res.status(404).json({ error: "Template not found for this user" });
-        return res.status(200).json(template);
-    } catch (error) {
-        return res.status(500).json({ error: error.message });
-    }
-}
+    const templates = await Template.find({
+      $or: [
+        { category: "system" },
+        { user_id: userId },
+      ],
+    }).sort({ createdAt: -1 });
 
+    res.json(templates);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+/* =========================
+   GET SINGLE TEMPLATE
+========================= */
 export const getTemplate = async (req, res) => {
-    const { id } = req.params;
-    try {
-        const template = await Template.findOne({ _id: id }).populate("user_id", "-password");
-        if (!template) return res.status(404).json({ error: "Template not found" });
-        return res.status(200).json(template);
-    } catch (error) {
-        return res.status(500).json({ error: error.message });
-    }
-}
+  try {
+    const template = await Template.findById(req.params.id);
 
-export const UpdateTemplate = async (req, res) => {
-    const { id } = req.params;
-    const { template, prime } = req.body;
-    if (!template || typeof template !== "object") return res.status(400).json({ error: "Invalid template data" });
-    try {
-        const template_exist = await Template.findOne({ _id: id });
-        if (!template_exist) return res.status(404).json({ error: "Template not found" });
-        
-        await Template.updateOne({ _id: id }, { $set: { template, prime } });
-        return res.status(200).json({ message: "Template updated successfully" });
-    } catch (error) {
-        return res.status(500).json({ error: error.message });
+    if (!template) {
+      return res.status(404).json({ error: "Template not found" });
     }
-}
 
+    // Ownership check
+    if (
+      template.category !== "system" &&
+      template.user_id.toString() !== req.user.id
+    ) {
+      return res.status(403).json({ error: "Forbidden" });
+    }
+
+    res.json(template);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+/* =========================
+   UPDATE TEMPLATE
+========================= */
+export const updateTemplate = async (req, res) => {
+  try {
+    const { document, name, isPrime } = req.body;
+
+    const template = await Template.findById(req.params.id);
+    if (!template) {
+      return res.status(404).json({ error: "Template not found" });
+    }
+
+    if (template.user_id.toString() !== req.user.id) {
+      return res.status(403).json({ error: "Forbidden" });
+    }
+
+    template.document = document ?? template.document;
+    template.name = name ?? template.name;
+    template.isPrime = isPrime ?? template.isPrime;
+
+    await template.save();
+
+    res.json({ message: "Template updated", template });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+/* =========================
+   DELETE TEMPLATE
+========================= */
 export const deleteTemplate = async (req, res) => {
-    const { id } = req.params;
-    try {
-        const template = await Template.findOne({ _id: id });
-        if (!template) return res.status(404).json({ error: "Template not found" });
-        await Template.deleteOne({ _id: id });
-        return res.status(200).json({ message: "Template deleted successfully" });
-    } catch (error) {
-        return res.status(500).json({ error: error.message });
+  try {
+    const template = await Template.findById(req.params.id);
+
+    if (!template) {
+      return res.status(404).json({ error: "Template not found" });
     }
-}
+
+    if (template.user_id.toString() !== req.user.id) {
+      return res.status(403).json({ error: "Forbidden" });
+    }
+
+    await template.deleteOne();
+    res.json({ message: "Template deleted" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};

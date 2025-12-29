@@ -1,11 +1,12 @@
 import { MenuMetaForm } from "./MenuMetaForm";
 import { ThemeControls } from "./ThemeControls";
 import { SectionsEditor } from "./SectionsEditor";
-import { TemplateControls } from "./TemplateControls";
+import { AppearanceControls } from "./AppearanceControl";
 import { useState } from "react";
 import { FaAnglesLeft, FaAnglesRight } from "react-icons/fa6";
 import { motion } from "motion/react";
 import { useMenuEditor } from "@/context/MenuEditorContext";
+import { TemplateBuilder } from "../template/TemplateBuilder";
 
 export function MenuEditor() {
   const [isOpen, setIsOpen] = useState(true);
@@ -57,12 +58,11 @@ export function MenuEditor() {
                       onClick={() => setMode(m)}
                       className={`
                         px-4 py-2 text-sm rounded-md transition duration-200 font-medium
-                        ${
-                          active
-                            ? editorTheme === "dark"
-                              ? "bg-blue-600/80 shadow-lg shadow-blue-500/30 text-white"
-                              : "bg-white shadow-md text-blue-600"
-                            : editorTheme === "dark"
+                        ${active
+                          ? editorTheme === "dark"
+                            ? "bg-blue-600/80 shadow-lg shadow-blue-500/30 text-white"
+                            : "bg-white shadow-md text-blue-600"
+                          : editorTheme === "dark"
                             ? "text-slate-300 hover:text-white hover:bg-slate-700/30"
                             : "text-slate-600 hover:text-slate-900"
                         }
@@ -77,69 +77,18 @@ export function MenuEditor() {
 
             {/* MENU MODE */}
             {mode === "menu" && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="space-y-4"
-              >
-                <motion.div
-                  layoutId="menu-section"
-                  className={`
-                    rounded-xl p-5
-                    transition duration-300
-                    ${editorTheme === "dark"
-                      ? "bg-slate-800/30 border border-slate-700/50 shadow-lg"
-                      : "bg-white border border-slate-200/50 shadow-md"
-                    }
-                  `}
-                >
-                  <MenuMetaForm />
-                </motion.div>
-
-                <motion.div
-                  className={`
-                    rounded-xl p-5
-                    transition duration-300
-                    ${editorTheme === "dark"
-                      ? "bg-slate-800/30 border border-slate-700/50 shadow-lg"
-                      : "bg-white border border-slate-200/50 shadow-md"
-                    }
-                  `}
-                >
-                  <ThemeControls />
-                </motion.div>
-
-                <motion.div
-                  className={`
-                    rounded-xl p-5
-                    transition duration-300
-                    ${editorTheme === "dark"
-                      ? "bg-slate-800/30 border border-slate-700/50 shadow-lg"
-                      : "bg-white border border-slate-200/50 shadow-md"
-                    }
-                  `}
-                >
-                  <SectionsEditor />
-                </motion.div>
-              </motion.div>
+              <>
+                <MenuMetaForm />
+                <ThemeControls />
+                <AppearanceControls />
+                <SectionsEditor />
+              </>
             )}
+
 
             {/* TEMPLATE MODE */}
             {mode === "template" && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className={`
-                  rounded-xl p-5
-                  transition duration-300
-                  ${editorTheme === "dark"
-                    ? "bg-slate-800/30 border border-slate-700/50 shadow-lg"
-                    : "bg-white border border-slate-200/50 shadow-md"
-                  }
-                `}
-              >
-                <TemplateControls />
-              </motion.div>
+              <TemplateBuilder/>
             )}
           </motion.div>
         )}
