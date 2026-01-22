@@ -1,3 +1,4 @@
+import { CanvasNode } from "./canvas.ts";
 /* =====================
    Meta
 ===================== */
@@ -140,4 +141,7 @@ export interface MenuDocument {
   theme: ThemeConfig;
   visuals?: MenuVisuals;
   sections: MenuSection[];
+  canvas: {
+    nodes: CanvasNode[];
+  };
 }

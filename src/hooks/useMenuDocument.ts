@@ -46,29 +46,53 @@ export const initialMenu: MenuDocument = {
   },
 
   sections: [],
+
+  /* =====================
+     ✅ NEW: Canvas Layer
+  ===================== */
+  canvas: {
+    nodes: [],
+  },
 };
+
+/* =====================
+   Normalizer (IMPORTANT)
+===================== */
+
+function normalizeMenu(menu: MenuDocument): MenuDocument {
+  return {
+    ...menu,
+    canvas: menu.canvas ?? { nodes: [] },
+  };
+}
 
 /* =====================
    Hook
 ===================== */
 
 export function useMenuDocument() {
-  const [menu, setMenu] = useState<MenuDocument>(initialMenu);
+  const [menu, setMenu] = useState<MenuDocument>(() =>
+    normalizeMenu(initialMenu)
+  );
 
   const addSection = () =>
-    setMenu((m) => ({
-      ...m,
-      sections: [
-        ...m.sections,
-        { id: nanoid(), title: "New Section", items: [] },
-      ],
-    }));
+    setMenu((m) =>
+      normalizeMenu({
+        ...m,
+        sections: [
+          ...m.sections,
+          { id: nanoid(), title: "New Section", items: [] },
+        ],
+      })
+    );
 
   const updateMenu = (partial: Partial<MenuDocument>) =>
-    setMenu((m) => ({
-      ...m,
-      ...partial,
-    }));
+    setMenu((m) =>
+      normalizeMenu({
+        ...m,
+        ...partial,
+      })
+    );
 
   return {
     menu,

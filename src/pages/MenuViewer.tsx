@@ -67,7 +67,7 @@ export default function MenuViewer() {
           transition={{ duration: 0.3 }}
           className="text-center"
         >
-          <Loader variant="page" />
+          <Loader />
           <p className={`
             text-sm mt-4 font-medium
             ${editorTheme === "dark"

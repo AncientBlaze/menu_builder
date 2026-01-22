@@ -94,8 +94,8 @@ export function PreviewToolbar() {
                   ? "bg-gradient-to-br from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 text-white shadow-lg shadow-green-500/30"
                   : "bg-gradient-to-br from-green-500 to-green-600 hover:from-green-400 hover:to-green-500 text-white shadow-md shadow-green-300/50"
                 : editorTheme === "dark"
-                ? "bg-slate-700/50 text-slate-400 cursor-not-allowed"
-                : "bg-slate-200 text-slate-400 cursor-not-allowed"
+                  ? "bg-slate-700/50 text-slate-400 cursor-not-allowed"
+                  : "bg-slate-200 text-slate-400 cursor-not-allowed"
             )}
           >
             💾 Save
@@ -151,37 +151,43 @@ export function PreviewToolbar() {
             whileTap={{ scale: 0.95 }}
             onClick={async () => {
               const el = document.getElementById("menu-preview");
+
               if (!el) {
                 toast.error("Menu not found");
                 return;
               }
+
               try {
-                setRenderMode("export");
+                // 🧘 Let layout + fonts settle
+                await new Promise(requestAnimationFrame);
+                await new Promise(requestAnimationFrame);
+
+                // 📸 Capture FIRST
                 await exportMenuPDF(el);
+
                 toast.success("PDF exported successfully!");
               } catch (error) {
                 toast.error("Failed to export PDF");
                 console.error(error);
-              } finally {
-                setRenderMode("editor");
               }
             }}
             className={`
-              h-10 px-5
-              rounded-lg
-              text-sm font-semibold
-              transition duration-300
-              flex items-center gap-2
-              whitespace-nowrap
-              shadow-lg
-              ${editorTheme === "dark"
+    h-10 px-5
+    rounded-lg
+    text-sm font-semibold
+    transition duration-300
+    flex items-center gap-2
+    whitespace-nowrap
+    shadow-lg
+    ${editorTheme === "dark"
                 ? "bg-gradient-to-br from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white shadow-red-500/30 hover:shadow-lg hover:shadow-red-500/40"
                 : "bg-gradient-to-br from-red-500 to-red-600 hover:from-red-400 hover:to-red-500 text-white shadow-red-300/50 hover:shadow-lg hover:shadow-red-400/60"
               }
-            `}
+  `}
           >
             📄 Export
           </motion.button>
+
         </div>
       </motion.div>
 

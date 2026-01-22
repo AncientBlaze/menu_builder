@@ -3,29 +3,96 @@ import { ThemeControls } from "./ThemeControls";
 import { SectionsEditor } from "./SectionsEditor";
 import { TemplateControls } from "./TemplateControls";
 import { useState } from "react";
-import { FaAnglesLeft, FaAnglesRight } from "react-icons/fa6";
+import { FaAnglesLeft, FaAnglesRight, FaSquare, FaCircle, FaImage } from "react-icons/fa6";
 import { motion } from "motion/react";
 import { useMenuEditor } from "@/context/MenuEditorContext";
+import { CanvasInspector } from "../CanvasInspector";
+import { LayersPanel } from "./LayersPanel";
+
+
+/* =====================
+  Menu Editor
+===================== */
 
 export function MenuEditor() {
   const [isOpen, setIsOpen] = useState(true);
-  const { mode, setMode, editorTheme } = useMenuEditor();
+  const { mode, setMode, editorTheme, addCanvasNode } = useMenuEditor();
+
+  /* =====================
+    Canvas Actions
+  ===================== */
+
+  const addRectangle = () =>
+    addCanvasNode({
+      type: "shape",
+      width: 320,
+      height: 180,
+      z: 0,
+      props: {
+        kind: "rect",
+        fill: "#000",
+        opacity: 0.06,
+        radius: 16,
+      },
+    });
+
+  const addCircle = () =>
+    addCanvasNode({
+      type: "shape",
+      width: 220,
+      height: 220,
+      z: 0,
+      props: {
+        kind: "circle",
+        fill: "#000",
+        opacity: 0.06,
+      },
+    });
+
+  const addDecorativeSvg = () =>
+    addCanvasNode({
+      type: "shape",
+      width: 300,
+      height: 300,
+      z: 0,
+      props: {
+        kind: "svg",
+        svgPath:
+          "M50 5 C20 20, 0 50, 50 95 C100 50, 80 20, 50 5 Z",
+        fill: "#000",
+        opacity: 0.05,
+      },
+    });
+
+  const onImageUpload = (file: File) => {
+    const url = URL.createObjectURL(file);
+    addCanvasNode({
+      type: "image",
+      width: 260,
+      height: 260,
+      z: 5,
+      props: {
+        src: url,
+        fit: "contain",
+      },
+    });
+  };
 
   return (
     <div className="relative flex h-full">
       {/* Editor Panel */}
       <aside
         className={`
-          h-full
-          transition-all duration-300 ease-in-out
-          overflow-y-auto
-          border-r
-          ${editorTheme === "dark"
+            h-full
+            transition-all duration-300 ease-in-out
+            overflow-y-auto
+            border-r
+            ${editorTheme === "dark"
             ? "bg-slate-900/50 border-slate-700/50"
             : "bg-slate-50 border-slate-200"
           }
-          ${isOpen ? "w-[440px] px-5 py-6" : "w-0 px-0 py-0"}
-        `}
+            ${isOpen ? "w-[440px] px-5 py-6" : "w-0 px-0 py-0"}
+          `}
       >
         {isOpen && (
           <motion.div
@@ -38,13 +105,12 @@ export function MenuEditor() {
               <motion.div
                 layout
                 className={`
-                  flex rounded-lg p-1.5 gap-1
-                  ${editorTheme === "dark"
+                    flex rounded-lg p-1.5 gap-1
+                    ${editorTheme === "dark"
                     ? "bg-slate-800/50 border border-slate-700/50"
                     : "bg-slate-200 border border-slate-300"
                   }
-                  transition duration-300
-                `}
+                  `}
               >
                 {(["menu", "template"] as const).map((m) => {
                   const active = mode === m;
@@ -56,17 +122,16 @@ export function MenuEditor() {
                       whileTap={{ scale: 0.98 }}
                       onClick={() => setMode(m)}
                       className={`
-                        px-4 py-2 text-sm rounded-md transition duration-200 font-medium
-                        ${
-                          active
-                            ? editorTheme === "dark"
-                              ? "bg-blue-600/80 shadow-lg shadow-blue-500/30 text-white"
-                              : "bg-white shadow-md text-blue-600"
-                            : editorTheme === "dark"
-                            ? "text-slate-300 hover:text-white hover:bg-slate-700/30"
+                          px-4 py-2 text-sm rounded-md font-medium transition
+                          ${active
+                          ? editorTheme === "dark"
+                            ? "bg-blue-600/80 text-white"
+                            : "bg-white text-blue-600"
+                          : editorTheme === "dark"
+                            ? "text-slate-300 hover:text-white"
                             : "text-slate-600 hover:text-slate-900"
                         }
-                      `}
+                        `}
                     >
                       {m === "menu" ? "Menu" : "Template"}
                     </motion.button>
@@ -82,64 +147,86 @@ export function MenuEditor() {
                 animate={{ opacity: 1, y: 0 }}
                 className="space-y-4"
               >
-                <motion.div
-                  layoutId="menu-section"
-                  className={`
-                    rounded-xl p-5
-                    transition duration-300
-                    ${editorTheme === "dark"
-                      ? "bg-slate-800/30 border border-slate-700/50 shadow-lg"
-                      : "bg-white border border-slate-200/50 shadow-md"
-                    }
-                  `}
-                >
+                {/* Meta */}
+                <div className={panel(editorTheme)}>
                   <MenuMetaForm />
-                </motion.div>
+                </div>
 
-                <motion.div
-                  className={`
-                    rounded-xl p-5
-                    transition duration-300
-                    ${editorTheme === "dark"
-                      ? "bg-slate-800/30 border border-slate-700/50 shadow-lg"
-                      : "bg-white border border-slate-200/50 shadow-md"
-                    }
-                  `}
-                >
+                {/* Theme */}
+                <div className={panel(editorTheme)}>
                   <ThemeControls />
-                </motion.div>
+                </div>
 
-                <motion.div
-                  className={`
-                    rounded-xl p-5
-                    transition duration-300
-                    ${editorTheme === "dark"
-                      ? "bg-slate-800/30 border border-slate-700/50 shadow-lg"
-                      : "bg-white border border-slate-200/50 shadow-md"
-                    }
-                  `}
-                >
+                {/* Sections */}
+                <div className={panel(editorTheme)}>
                   <SectionsEditor />
-                </motion.div>
+                </div>
+
+                {/* =====================
+                      Canvas Controls (NEW)
+                  ===================== */}
+                <div className={panel(editorTheme)}>
+                  <h3 className="text-sm font-semibold mb-3">
+                    Canvas Elements
+                  </h3>
+
+                  <div className="grid grid-cols-3 gap-3">
+                    <button
+                      onClick={addRectangle}
+                      className={canvasBtn(editorTheme)}
+                    >
+                      <FaSquare /> Rect
+                    </button>
+
+                    <button
+                      onClick={addCircle}
+                      className={canvasBtn(editorTheme)}
+                    >
+                      <FaCircle /> Circle
+                    </button>
+
+                    <button
+                      onClick={addDecorativeSvg}
+                      className={canvasBtn(editorTheme)}
+                    >
+                      SVG
+                    </button>
+                  </div>
+
+                  <label className="mt-4 block">
+                    <input
+                      type="file"
+                      accept="image/*,svg+xml"
+                      hidden
+                      onChange={(e) =>
+                        e.target.files &&
+                        onImageUpload(e.target.files[0])
+                      }
+                    />
+                    <div className={canvasBtn(editorTheme)}>
+                      <FaImage /> Upload Image
+                    </div>
+                  </label>
+                </div>
+                {/* LAYERS */}
+                <div className={panel(editorTheme)}>
+                  <LayersPanel />
+                </div>
+
+                {/* INSPECTOR */}
+                <div className={panel(editorTheme)}>
+                  <CanvasInspector />
+                </div>
+
               </motion.div>
+
             )}
 
             {/* TEMPLATE MODE */}
             {mode === "template" && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className={`
-                  rounded-xl p-5
-                  transition duration-300
-                  ${editorTheme === "dark"
-                    ? "bg-slate-800/30 border border-slate-700/50 shadow-lg"
-                    : "bg-white border border-slate-200/50 shadow-md"
-                  }
-                `}
-              >
+              <div className={panel(editorTheme)}>
                 <TemplateControls />
-              </motion.div>
+              </div>
             )}
           </motion.div>
         )}
@@ -149,27 +236,44 @@ export function MenuEditor() {
       <motion.button
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.95 }}
-        transition={{ type: "spring", stiffness: 260, damping: 18 }}
         onClick={() => setIsOpen((v) => !v)}
         className={`
-          absolute top-24 -right-5 z-20
-          h-10 w-10 rounded-full
-          flex items-center justify-center
-          shadow-lg transition duration-300
-          ${editorTheme === "dark"
-            ? "bg-gradient-to-br from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 border border-blue-500/30"
-            : "bg-slate-700 hover:bg-slate-600 border border-slate-600"
+            absolute top-24 -right-5 z-20
+            h-10 w-10 rounded-full
+            flex items-center justify-center
+            ${editorTheme === "dark"
+            ? "bg-blue-600"
+            : "bg-slate-700"
           }
-          text-white hover:shadow-xl
-        `}
-        title={isOpen ? "Hide editor" : "Show editor"}
+            text-white shadow-lg
+          `}
       >
-        {isOpen ? (
-          <FaAnglesLeft size={16} />
-        ) : (
-          <FaAnglesRight size={16} />
-        )}
+        {isOpen ? <FaAnglesLeft /> : <FaAnglesRight />}
       </motion.button>
     </div>
   );
 }
+
+/* =====================
+  UI helpers
+===================== */
+
+const panel = (theme: string) =>
+  `
+      rounded-xl p-5
+      ${theme === "dark"
+    ? "bg-slate-800/30 border border-slate-700/50"
+    : "bg-white border border-slate-200/50"}
+    `;
+
+const canvasBtn = (theme: string) =>
+  `
+      flex items-center justify-center gap-2
+      text-sm font-medium
+      px-3 py-2 rounded-md
+      transition
+      ${theme === "dark"
+    ? "bg-slate-700/50 hover:bg-slate-700 text-slate-200"
+    : "bg-slate-100 hover:bg-slate-200 text-slate-700"
+  }
+    `;

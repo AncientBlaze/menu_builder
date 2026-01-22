@@ -49,9 +49,10 @@ export function PreviewPane() {
           }
         `}
       >
-        <div className="p-4">
+        <div id="menu-preview">
           <MenuPreview />
         </div>
+
       </motion.div>
     </section>
   );

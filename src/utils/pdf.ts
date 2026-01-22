@@ -97,19 +97,30 @@ export async function exportMenuPDF(
     setExportMode?: (v: boolean) => void;
   }
 ): Promise<void> {
+  if (!element || !element.isConnected) {
+    console.error("PDF export aborted: element not mounted");
+    return;
+  }
+
+  if (!element.offsetWidth || !element.offsetHeight) {
+    console.error("PDF export aborted: element has no size");
+    return;
+  }
+
   const fileName = options?.fileName ?? "menu.pdf";
 
-  // 🔒 Enter export mode
+  // 🧘 Wait for layout + fonts
+  await nextPaint();
+  await nextPaint();
+
+  // 📸 Capture FIRST (important)
+  const blob = await generateMenuPdfBlob(element);
+
+  // 🔒 Now toggle export mode (UI only)
   options?.setExportMode?.(true);
   element.classList.add("pdf-export");
 
-  // 🧘 Let layout + fonts + bg settle
-  await nextPaint();
-  await nextPaint();
-
-  const blob = await generateMenuPdfBlob(element);
-
-  // 🔓 Exit export mode
+  // 🔓 Immediately restore
   element.classList.remove("pdf-export");
   options?.setExportMode?.(false);
 
@@ -120,3 +131,4 @@ export async function exportMenuPDF(
   a.click();
   URL.revokeObjectURL(url);
 }
+

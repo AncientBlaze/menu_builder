@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMenuEditor } from "@/context/MenuEditorContext";
 import { RxCross1 } from "react-icons/rx";
 import { FaCheck, FaX } from "react-icons/fa6";
@@ -13,11 +13,36 @@ export function TemplateTabs() {
     reorderPages,
   } = useMenuEditor();
 
-  const [confirmId, setConfirmId] =
-    useState<string | null>(null);
+  const [confirmId, setConfirmId] = useState<string | null>(null);
+  const [draggingId, setDraggingId] = useState<string | null>(null);
 
-  const [draggingId, setDraggingId] =
-    useState<string | null>(null);
+  /* ---------------- Keyboard Shortcuts ---------------- */
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      const isCmd = e.metaKey || e.ctrlKey;
+
+      // Ctrl/Cmd + 1..9 → switch tab
+      if (isCmd && e.key >= "1" && e.key <= "9") {
+        const index = Number(e.key) - 1;
+        const page = pages[index];
+        if (page) {
+          e.preventDefault();
+          switchPage(page.id);
+        }
+      }
+
+      // Ctrl/Cmd + W → close active tab
+      if (isCmd && e.key.toLowerCase() === "w") {
+        if (!activePageId) return;
+        e.preventDefault();
+        closePage(activePageId);
+      }
+    }
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [pages, activePageId, switchPage, closePage]);
+  /* --------------------------------------------------- */
 
   if (pages.length === 0) return null;
 
@@ -39,27 +64,19 @@ export function TemplateTabs() {
         const isConfirming = confirmId === page.id;
         const isDragging = draggingId === page.id;
 
-        const accent =
-          page.document.theme.accentColor;
+        const accent = page.document.theme.accentColor;
 
         return (
           <div
             key={page.id}
             draggable
-            onDragStart={() =>
-              setDraggingId(page.id)
-            }
-            onDragEnd={() =>
-              setDraggingId(null)
-            }
-            onDragOver={(e) => {
+            onDragStart={() => setDraggingId(page.id)}
+            onDragEnd={() => setDraggingId(null)}
+            onDragEnter={(e) => {
               e.preventDefault();
-              if (
-                draggingId &&
-                draggingId !== page.id
-              ) {
-                reorderPages(draggingId, page.id);
-              }
+              if (!draggingId) return;
+              if (draggingId === page.id) return;
+              reorderPages(draggingId, page.id);
             }}
             className={clsx(
               `
@@ -70,18 +87,20 @@ export function TemplateTabs() {
               text-sm
               cursor-pointer
               transition-all
+              select-none
               `,
               isActive
                 ? "bg-slate-900 text-white shadow"
                 : "text-slate-700 hover:bg-slate-100",
-              isDragging &&
-              "opacity-40 scale-95"
+              isDragging && "opacity-40 scale-95 cursor-grabbing",
+              draggingId &&
+                draggingId !== page.id &&
+                "ring-2 ring-slate-300"
             )}
             onClick={(e) => {
               e.stopPropagation();
-              if (!isConfirming) {
-                switchPage(page.id);
-              }
+              if (draggingId) return;
+              if (!isConfirming) switchPage(page.id);
             }}
           >
             {/* Accent dot */}
@@ -108,6 +127,7 @@ export function TemplateTabs() {
               <button
                 onClick={(e) => {
                   e.stopPropagation();
+                  if (draggingId) return;
                   setConfirmId(page.id);
                 }}
                 className={clsx(

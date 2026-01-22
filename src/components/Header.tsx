@@ -29,14 +29,6 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-40 backdrop-blur-md">
-      {/* Background Gradient */}
-      <div className="absolute inset-0 bg-gradient-to-r from-blue-50 via-white to-blue-50 pointer-events-none" />
-      
-      {/* Decorative Top Border */}
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-400/30 to-transparent" />
-      
-      {/* Shadow */}
-      <div className="absolute inset-0 shadow-lg shadow-blue-200/30 pointer-events-none" />
 
       <div className="relative max-w-7xl mx-auto px-6 py-5 flex items-center justify-between">
         {/* Left Section - Logo & Branding */}
