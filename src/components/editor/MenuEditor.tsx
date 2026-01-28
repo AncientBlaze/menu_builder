@@ -25,6 +25,7 @@ export function MenuEditor() {
   const addRectangle = () =>
     addCanvasNode({
       type: "shape",
+      name: "Rectangle",
       width: 320,
       height: 180,
       z: 0,
@@ -39,6 +40,7 @@ export function MenuEditor() {
   const addCircle = () =>
     addCanvasNode({
       type: "shape",
+      name: "circle",
       width: 220,
       height: 220,
       z: 0,
@@ -52,6 +54,7 @@ export function MenuEditor() {
   const addDecorativeSvg = () =>
     addCanvasNode({
       type: "shape",
+      name: "customsvg",
       width: 300,
       height: 300,
       z: 0,
@@ -68,6 +71,7 @@ export function MenuEditor() {
     const url = URL.createObjectURL(file);
     addCanvasNode({
       type: "image",
+      name: "image",
       width: 260,
       height: 260,
       z: 5,
@@ -186,11 +190,31 @@ export function MenuEditor() {
                     </button>
 
                     <button
+                      draggable
                       onClick={addDecorativeSvg}
+                      onDragStart={(e) => {
+                        e.dataTransfer.setData(
+                          "application/canvas-node",
+                          JSON.stringify({
+                            type: "shape",
+                            props: {
+                              kind: "svg",
+                              svgPath:
+                                "M50 5 C20 20, 0 50, 50 95 C100 50, 80 20, 50 5 Z",
+                              fill: "#000",
+                              opacity: 0.05,
+                            },
+                            width: 300,
+                            height: 300,
+                          })
+                        );
+                        e.dataTransfer.effectAllowed = "copy";
+                      }}
                       className={canvasBtn(editorTheme)}
                     >
                       SVG
                     </button>
+
                   </div>
 
                   <label className="mt-4 block">

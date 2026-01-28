@@ -94,7 +94,6 @@ export async function exportMenuPDF(
   element: HTMLElement,
   options?: {
     fileName?: string;
-    setExportMode?: (v: boolean) => void;
   }
 ): Promise<void> {
   if (!element || !element.isConnected) {
@@ -109,21 +108,20 @@ export async function exportMenuPDF(
 
   const fileName = options?.fileName ?? "menu.pdf";
 
-  // 🧘 Wait for layout + fonts
-  await nextPaint();
-  await nextPaint();
-
-  // 📸 Capture FIRST (important)
-  const blob = await generateMenuPdfBlob(element);
-
-  // 🔒 Now toggle export mode (UI only)
-  options?.setExportMode?.(true);
+  // 🔒 APPLY EXPORT CLASS FIRST (CRITICAL)
   element.classList.add("pdf-export");
 
-  // 🔓 Immediately restore
-  element.classList.remove("pdf-export");
-  options?.setExportMode?.(false);
+  // 🧘 allow CSS to apply
+  await new Promise(requestAnimationFrame);
+  await new Promise(requestAnimationFrame);
 
+  // 📸 CAPTURE
+  const blob = await generateMenuPdfBlob(element);
+
+  // 🔓 CLEAN UP
+  element.classList.remove("pdf-export");
+
+  // 💾 DOWNLOAD
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
@@ -131,4 +129,5 @@ export async function exportMenuPDF(
   a.click();
   URL.revokeObjectURL(url);
 }
+
 

@@ -1,6 +1,8 @@
 import { useMenuEditor } from "@/context/MenuEditorContext";
 import clsx from "clsx";
 import { FaEye, FaEyeSlash, FaLock, FaUnlock, FaTrash } from "react-icons/fa6";
+import { useState } from "react";
+
 
 export function LayersPanel() {
   const {
@@ -10,11 +12,17 @@ export function LayersPanel() {
     updateCanvasNode,
     removeCanvasNode,
     updateMenu,
+    renameCanvasNode,
   } = useMenuEditor();
 
-  const nodes = [...menu.canvas.nodes]
-    .filter((n) => n.visible !== false)
-    .sort((a, b) => b.z - a.z); // top = front
+
+  const nodes = [...menu.canvas.nodes].sort(
+    (a, b) => b.z - a.z
+  );
+
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [draftName, setDraftName] = useState("");
+
 
   const moveLayer = (from: number, to: number) => {
     updateMenu((m) => {
@@ -56,9 +64,14 @@ export function LayersPanel() {
                 "flex items-center gap-2 px-2 py-1 rounded cursor-pointer",
                 selected
                   ? "bg-blue-500/15 border border-blue-500/40"
-                  : "hover:bg-slate-200/50 dark:hover:bg-slate-700/40"
+                  : "hover:bg-slate-200/50 dark:hover:bg-slate-700/40",
+                node.visible === false && "opacity-40 italic"
               )}
-              onClick={() => selectCanvasNode(node.id)}
+
+              onClick={() => {
+                if (node.visible === false) return;
+                selectCanvasNode(node.id);
+              }}
             >
               {/* Drag handles */}
               <div className="flex flex-col text-xs leading-none">
@@ -84,8 +97,46 @@ export function LayersPanel() {
 
               {/* Label */}
               <div className="flex-1 truncate">
-                {node.type.toUpperCase()} — {node.id.slice(0, 4)}
+                {editingId === node.id ? (
+                  <input
+                    autoFocus
+                    value={draftName}
+                    onChange={(e) => setDraftName(e.target.value)}
+                    onBlur={() => {
+                      renameCanvasNode(node.id, draftName.trim() || node.type);
+                      setEditingId(null);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        renameCanvasNode(node.id, draftName.trim() || node.type);
+                        setEditingId(null);
+                      }
+                      if (e.key === "Escape") {
+                        setEditingId(null);
+                      }
+                    }}
+                    className="
+        w-full bg-transparent
+        border border-blue-400/40
+        rounded px-1 text-sm
+        outline-none
+      "
+                  />
+                ) : (
+                  <span
+                    onDoubleClick={(e) => {
+                      e.stopPropagation();
+                      setEditingId(node.id);
+                      setDraftName(node.name || node.type);
+                    }}
+                    className="cursor-text"
+                    title="Double click to rename"
+                  >
+                    {node.name || node.type}
+                  </span>
+                )}
               </div>
+
 
               {/* Visibility */}
               <button

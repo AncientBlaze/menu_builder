@@ -70,3 +70,38 @@
 ::-webkit-scrollbar-thumb:window-inactive {
   background: rgba(255, 255, 255, 0.3);
 }
+
+/* =========================
+   PDF EXPORT CLEANUP
+========================= */
+
+.pdf-export {
+  /* prevent subpixel borders */
+  outline: none !important;
+}
+
+/* Hide selection boxes, resize handles, anchors */
+.pdf-export .selection,
+.pdf-export .resize-handle,
+.pdf-export .anchor,
+.pdf-export .canvas-outline,
+.pdf-export .canvas-controls,
+.pdf-export [data-editor-ui="true"] {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+/* If your shapes use outlines */
+.pdf-export .shape,
+.pdf-export svg *,
+.pdf-export canvas {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.pdf-export [data-editor-ui="true"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+}

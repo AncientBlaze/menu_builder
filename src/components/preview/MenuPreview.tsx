@@ -1,14 +1,16 @@
 import { useRef } from "react";
+import clsx from "clsx";
 import { useMenuEditor } from "@/context/MenuEditorContext";
 import { GOOGLE_FONTS } from "@/constants/fonts";
-import clsx from "clsx";
 import { DraggableLogo } from "./DraggableLogo";
 
 /* =====================
    Anchor math
 ===================== */
 
-function resolveAnchor(anchor: string, rect: { width: number; height: number }) {
+type Rect = { width: number; height: number };
+
+function resolveAnchor(anchor: string, rect: Rect) {
   switch (anchor) {
     case "top-left": return { x: 0, y: 0 };
     case "top-center": return { x: rect.width / 2, y: 0 };
@@ -25,78 +27,31 @@ function resolveAnchor(anchor: string, rect: { width: number; height: number }) 
    Canvas Node View
 ===================== */
 
+type CanvasNodeViewProps = {
+  node: any;
+  isSelected: boolean;
+  isPrimary: boolean;
+  onSelect: (e: React.PointerEvent) => void;
+  onDrag: (dx: number, dy: number) => void;
+};
+
 function CanvasNodeView({
   node,
-  selected,
+  isSelected,
+  isPrimary,
   onSelect,
   onDrag,
-  onResize,
-}: {
-  node: any;
-  selected: boolean;
-  onSelect: () => void;
-  onDrag: (dx: number, dy: number) => void;
-  onResize: (dw: number, dh: number) => void;
-}) {
+}: CanvasNodeViewProps) {
   if (node.visible === false) return null;
 
   const dragStart = useRef<{ x: number; y: number } | null>(null);
-  const resizeStart = useRef<{ x: number; y: number } | null>(null);
-  const rotateStart = useRef<{
-    angle: number;
-    rotation: number;
-  } | null>(null);
-
-  /* ---------- Drag / Rotate ---------- */
 
   const onPointerDown = (e: React.PointerEvent) => {
     e.stopPropagation();
-    onSelect();
+    onSelect(e);
 
-    if (node.locked || !selected) return;
+    if (!isPrimary || node.locked) return;
 
-    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    const cx = rect.left + rect.width / 2;
-    const cy = rect.top + rect.height / 2;
-
-    // 🔄 ALT = ROTATE
-    if (e.altKey) {
-      const startAngle =
-        Math.atan2(e.clientY - cy, e.clientX - cx) * (180 / Math.PI);
-
-      rotateStart.current = {
-        angle: startAngle,
-        rotation: node.rotation ?? 0,
-      };
-
-      const move = (ev: PointerEvent) => {
-        if (!rotateStart.current) return;
-
-        const angle =
-          Math.atan2(ev.clientY - cy, ev.clientX - cx) *
-          (180 / Math.PI);
-
-        let delta = angle - rotateStart.current.angle;
-
-        // 🐢 fine rotation
-        if (ev.shiftKey) delta *= 0.2;
-
-        onResize(0, 0);
-        node.rotation = rotateStart.current.rotation + delta;
-      };
-
-      const up = () => {
-        rotateStart.current = null;
-        window.removeEventListener("pointermove", move);
-        window.removeEventListener("pointerup", up);
-      };
-
-      window.addEventListener("pointermove", move);
-      window.addEventListener("pointerup", up);
-      return;
-    }
-
-    // ⬛ NORMAL DRAG
     dragStart.current = { x: e.clientX, y: e.clientY };
 
     const move = (ev: PointerEvent) => {
@@ -117,73 +72,42 @@ function CanvasNodeView({
     window.addEventListener("pointerup", up);
   };
 
-  /* ---------- Resize ---------- */
-
-  const startResize = (
-    e: React.PointerEvent,
-    dir: "nw" | "ne" | "sw" | "se"
-  ) => {
-    if (node.locked) return;
-    e.stopPropagation();
-
-    resizeStart.current = { x: e.clientX, y: e.clientY };
-
-    const aspect = node.width / node.height;
-
-    const move = (ev: PointerEvent) => {
-      if (!resizeStart.current) return;
-
-      let dx = ev.clientX - resizeStart.current.x;
-      let dy = ev.clientY - resizeStart.current.y;
-
-      let dw = dir.includes("e") ? dx : -dx;
-      let dh = dir.includes("s") ? dy : -dy;
-
-      // 🔒 SHIFT = lock ratio
-      if (ev.shiftKey) {
-        if (Math.abs(dw) > Math.abs(dh)) {
-          dh = dw / aspect;
-        } else {
-          dw = dh * aspect;
-        }
-      }
-
-      // 🎯 ALT = resize from center
-      if (ev.altKey) {
-        dw *= 2;
-        dh *= 2;
-      }
-
-      onResize(dw, dh);
-    };
-
-    const up = () => {
-      resizeStart.current = null;
-      window.removeEventListener("pointermove", move);
-      window.removeEventListener("pointerup", up);
-    };
-
-    window.addEventListener("pointermove", move);
-    window.addEventListener("pointerup", up);
-  };
-
-  /* ---------- Style ---------- */
-
   const style: React.CSSProperties = {
     width: node.width,
     height: node.height,
     transform: `translate(-50%, -50%) rotate(${node.rotation ?? 0}deg)`,
+    cursor: isPrimary && !node.locked ? "move" : "default",
     pointerEvents: "auto",
-    cursor: selected && !node.locked ? "move" : "default",
   };
 
   return (
-    <div
-      className={clsx("absolute", selected && "ring-2 ring-blue-500")}
-      style={style}
-      onPointerDown={onPointerDown}
-    >
-      {/* SHAPE */}
+    <div className="absolute" style={style} onPointerDown={onPointerDown}>
+      {/* Selection ring */}
+      {isSelected && (
+        <div
+          data-editor-ui="true"
+          className={clsx(
+            "absolute inset-0 pointer-events-none rounded-[inherit]",
+            isPrimary
+              ? "ring-2 ring-blue-500"
+              : "ring-1 ring-blue-400/60"
+          )}
+        />
+      )}
+
+      {/* Name */}
+      {isPrimary && node.name && (
+        <div
+          data-editor-ui="true"
+          className="absolute -top-6 left-1/2 -translate-x-1/2
+                     text-[11px] px-2 py-[2px] rounded
+                     bg-black/80 text-white whitespace-nowrap pointer-events-none"
+        >
+          {node.name}
+        </div>
+      )}
+
+      {/* Shape */}
       {node.type === "shape" && node.props.kind !== "svg" && (
         <div
           className="w-full h-full"
@@ -207,7 +131,7 @@ function CanvasNodeView({
         </svg>
       )}
 
-      {/* IMAGE */}
+      {/* Image */}
       {node.type === "image" && (
         <img
           src={node.props.src}
@@ -215,29 +139,9 @@ function CanvasNodeView({
           className="w-full h-full object-contain"
         />
       )}
-
-      {/* RESIZE HANDLES */}
-      {selected && !node.locked && (
-        <>
-          {(["nw", "ne", "sw", "se"] as const).map((dir) => (
-            <div
-              key={dir}
-              className="absolute w-3 h-3 bg-white border border-blue-500"
-              style={{
-                top: dir.includes("n") ? 0 : "auto",
-                bottom: dir.includes("s") ? 0 : "auto",
-                left: dir.includes("w") ? 0 : "auto",
-                right: dir.includes("e") ? 0 : "auto",
-              }}
-              onPointerDown={(e) => startResize(e, dir)}
-            />
-          ))}
-        </>
-      )}
     </div>
   );
 }
-
 
 /* =====================
    Menu Preview
@@ -248,8 +152,10 @@ export function MenuPreview() {
     menu,
     renderMode,
     selectedCanvasNodeId,
+    selectedCanvasNodeIds,
     selectCanvasNode,
     updateCanvasNode,
+    addCanvasNode,
   } = useMenuEditor();
 
   const canvasRef = useRef<HTMLDivElement>(null);
@@ -263,8 +169,6 @@ export function MenuPreview() {
     priceAlignment,
     accentColor,
   } = menu.theme;
-
-  /* ---------- Layout helpers ---------- */
 
   const isTwoColumn = layout === "two-column";
 
@@ -280,8 +184,8 @@ export function MenuPreview() {
     dividerStyle === "none"
       ? ""
       : dividerStyle === "line"
-      ? "border-b border-slate-300"
-      : "border-b-2";
+        ? "border-b border-slate-300"
+        : "border-b-2";
 
   const fontCss =
     GOOGLE_FONTS.find((f) => f.value === fontFamily)?.css ?? "serif";
@@ -315,6 +219,27 @@ export function MenuPreview() {
           selectCanvasNode(null);
         }
       }}
+      onDragOver={(e) => e.preventDefault()}
+      onDrop={(e) => {
+        e.preventDefault();
+        if (!canvasRef.current) return;
+
+        const raw = e.dataTransfer.getData("application/canvas-node");
+        if (!raw) return;
+
+        const data = JSON.parse(raw);
+        const rect = canvasRef.current.getBoundingClientRect();
+
+        addCanvasNode({
+          ...data,
+          anchor: "top-left",
+          offset: {
+            x: e.clientX - rect.left,
+            y: e.clientY - rect.top,
+          },
+          z: 10,
+        });
+      }}
     >
       {/* BACKGROUND */}
       {showBackground && (
@@ -323,8 +248,8 @@ export function MenuPreview() {
         </div>
       )}
 
-      {/* CANVAS */}
-      <div className="absolute inset-0 z-10">
+      {/* CANVAS (decorative layer) */}
+      <div className="absolute inset-0 z-10 pointer-events-none">
         {canvasRef.current &&
           menu.canvas.nodes
             .slice()
@@ -345,8 +270,11 @@ export function MenuPreview() {
                 >
                   <CanvasNodeView
                     node={node}
-                    selected={node.id === selectedCanvasNodeId}
-                    onSelect={() => selectCanvasNode(node.id)}
+                    isSelected={selectedCanvasNodeIds.includes(node.id)}
+                    isPrimary={selectedCanvasNodeId === node.id}
+                    onSelect={(e) =>
+                      selectCanvasNode(node.id, e.shiftKey)
+                    }
                     onDrag={(dx, dy) =>
                       updateCanvasNode(node.id, {
                         offset: {
@@ -355,19 +283,14 @@ export function MenuPreview() {
                         },
                       })
                     }
-                    onResize={(dw, dh) =>
-                      updateCanvasNode(node.id, {
-                        width: Math.max(40, node.width + dw),
-                        height: Math.max(40, node.height + dh),
-                      })
-                    }
                   />
                 </div>
               );
             })}
       </div>
 
-      {/* CONTENT */}
+      {/* MENU CONTENT */}
+      {/* MENU CONTENT */}
       <div className="relative z-20 p-4 sm:p-6 md:p-8 lg:p-10 pointer-events-none">
         {/* LOGO TOP */}
         {logo?.url && logo.position === "top" && (
@@ -492,7 +415,16 @@ export function MenuPreview() {
         )}
       </div>
 
-      {renderMode === "editor" && <DraggableLogo />}
+
+      {/* EDITOR UI */}
+      {renderMode === "editor" && (
+        <div
+          data-editor-ui="true"
+          className="absolute inset-0 z-30 pointer-events-none"
+        >
+          <DraggableLogo />
+        </div>
+      )}
     </div>
   );
 }

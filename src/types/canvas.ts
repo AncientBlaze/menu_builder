@@ -24,7 +24,6 @@ export type CanvasNode = {
   locked?: boolean;
   visible?: boolean;
 
-  // 🔥 NEW (safe additions)
   name?: string;
   groupId: string | null;
 
