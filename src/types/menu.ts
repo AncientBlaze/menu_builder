@@ -6,6 +6,7 @@ import { CanvasNode } from "./canvas.ts";
 export type CurrencyCode = "₨" | "$" | "€";
 
 export interface MenuMeta {
+  snapshotUrl?: string;
   restaurantName: string;
   tagline?: string;
   address?: string;
@@ -104,7 +105,7 @@ export type PriceAlignment = "right" | "inline";
 export interface ThemeConfig {
   /* Visual identity */
   theme: ThemeVariant;
-  fontFamily: FontFamily;
+  fontFamily?: FontFamily;
   accentColor: string;
 
   /* Layout & behavior */

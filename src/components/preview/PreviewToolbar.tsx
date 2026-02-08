@@ -12,6 +12,8 @@ import { TemplateTabs } from "./TemplateTabs";
 import { motion } from "motion/react";
 import clsx from "clsx";
 import { toast } from "react-hot-toast";
+import { captureSnapshot } from "@/utils/captureSnapshot";
+
 
 export function PreviewToolbar() {
   const {
@@ -85,7 +87,32 @@ export function PreviewToolbar() {
           <motion.button
             whileHover={{ scale: activePage?.isDirty ? 1.04 : 1 }}
             whileTap={{ scale: activePage?.isDirty ? 0.97 : 1 }}
-            onClick={saveActivePage}
+            onClick={async () => {
+              const el = document.getElementById("menu-preview");
+
+              if (!el) {
+                toast.error("Menu preview not found");
+                return;
+              }
+
+              try {
+                // 🧘 Let layout + fonts settle
+                await new Promise(requestAnimationFrame);
+                await new Promise(requestAnimationFrame);
+
+                // 📸 Capture snapshot
+                const snapshot = await captureSnapshot(el);
+
+                // 💾 Save page WITH snapshot
+                saveActivePage(snapshot);
+
+                toast.success("Menu saved!");
+              } catch (err) {
+                console.error(err);
+                toast.error("Failed to save menu preview");
+              }
+            }}
+
             disabled={!activePage?.isDirty}
             className={clsx(
               "h-10 px-4 rounded-lg text-sm font-semibold transition duration-300 flex items-center gap-2",

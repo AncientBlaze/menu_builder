@@ -35,7 +35,7 @@ type CanvasNodeViewProps = {
   onDrag: (dx: number, dy: number) => void;
 };
 
-function CanvasNodeView({
+export function CanvasNodeView({
   node,
   isSelected,
   isPrimary,
@@ -72,6 +72,31 @@ function CanvasNodeView({
     window.addEventListener("pointerup", up);
   };
 
+  /* =====================
+     Visual styles
+  ===================== */
+
+  const background = node.props.gradient
+    ? node.props.gradient.type === "linear"
+      ? `linear-gradient(${node.props.gradient.angle ?? 90}deg, ${node.props.gradient.stops
+          .map((s: { color: string; position: number }) => `${s.color} ${s.position}%`)
+          .join(", ")})`
+      : `radial-gradient(circle, ${node.props.gradient.stops
+          .map((s: { color: string; position: number }) => `${s.color} ${s.position}%`)
+          .join(", ")})`
+    : node.props.fill ?? "#000";
+
+  const border =
+    node.props.borderWidth && node.props.borderWidth > 0
+      ? `${node.props.borderWidth}px ${node.props.borderStyle ?? "solid"} ${
+          node.props.borderColor ?? "#000"
+        }`
+      : undefined;
+
+  const boxShadow = node.props.shadow
+    ? `${node.props.shadow.x}px ${node.props.shadow.y}px ${node.props.shadow.blur}px ${node.props.shadow.color}`
+    : undefined;
+
   const style: React.CSSProperties = {
     width: node.width,
     height: node.height,
@@ -99,28 +124,33 @@ function CanvasNodeView({
       {isPrimary && node.name && (
         <div
           data-editor-ui="true"
-          className="absolute -top-6 left-1/2 -translate-x-1/2
-                     text-[11px] px-2 py-[2px] rounded
-                     bg-black/80 text-white whitespace-nowrap pointer-events-none"
+          className="
+            absolute -top-6 left-1/2 -translate-x-1/2
+            text-[11px] px-2 py-[2px]
+            rounded bg-black/80 text-white
+            whitespace-nowrap pointer-events-none
+          "
         >
           {node.name}
         </div>
       )}
 
-      {/* Shape */}
+      {/* SHAPE */}
       {node.type === "shape" && node.props.kind !== "svg" && (
         <div
           className="w-full h-full"
           style={{
-            background: node.props.fill ?? "#000",
+            background,
             opacity: node.props.opacity ?? 1,
             borderRadius:
               node.props.kind === "circle" ? "50%" : node.props.radius ?? 0,
+            border,
+            boxShadow,
           }}
         />
       )}
 
-      {/* SVG */}
+      {/* SVG (fill only, gradients require SVG defs later) */}
       {node.type === "shape" && node.props.kind === "svg" && (
         <svg viewBox="0 0 100 100" className="w-full h-full">
           <path
@@ -131,12 +161,17 @@ function CanvasNodeView({
         </svg>
       )}
 
-      {/* Image */}
+      {/* IMAGE */}
       {node.type === "image" && (
         <img
           src={node.props.src}
           draggable={false}
           className="w-full h-full object-contain"
+          style={{
+            borderRadius: node.props.radius ?? 0,
+            border,
+            boxShadow,
+          }}
         />
       )}
     </div>
@@ -289,7 +324,6 @@ export function MenuPreview() {
             })}
       </div>
 
-      {/* MENU CONTENT */}
       {/* MENU CONTENT */}
       <div className="relative z-20 p-4 sm:p-6 md:p-8 lg:p-10 pointer-events-none">
         {/* LOGO TOP */}

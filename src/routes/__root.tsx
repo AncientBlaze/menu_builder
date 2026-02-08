@@ -2,7 +2,6 @@ import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
 import appCss from '../styles.css?url'
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "@/QueryClient";
-import Header from '@/components/Header';
 import { useEffect } from 'react';
 import { useNavigate, useLocation } from '@tanstack/react-router';
 import { isAuthenticated } from '@/utils/auth-guard';
@@ -40,7 +39,7 @@ export const Route = createRootRoute({
 function RootDocument({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const isPublicRoute = ['/Landing', '/Login', '/Signup'].includes(location.pathname) || location.pathname.startsWith('/menu/');
+  
 
   useEffect(() => {
     if (location.pathname === '/' && !isAuthenticated()) {
@@ -55,7 +54,6 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         <Toaster position="top-right" reverseOrder={false} />
-        {isPublicRoute ? null : <Header/>}
         <QueryClientProvider client={queryClient}>
         {children}
         </QueryClientProvider>

@@ -5,9 +5,11 @@ import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import toast from "react-hot-toast";
 import { IoLogOutOutline } from "react-icons/io5";
+import { useMenuEditor } from "@/context/MenuEditorContext";
 
 export default function Header() {
   const navigate = useNavigate();
+  const { editorTheme } = useMenuEditor();
   const [userName, setUserName] = useState<string>("");
   const [restaurant, setRestaurant] = useState<string>("");
 
@@ -28,7 +30,10 @@ export default function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-40 backdrop-blur-md">
+    <header className={`w-full ${editorTheme === "dark"
+      ? "bg-slate-950"
+      : "bg-slate-50"
+      } top-0`}>
 
       <div className="relative max-w-7xl mx-auto px-6 py-5 flex items-center justify-between">
         {/* Left Section - Logo & Branding */}
@@ -82,10 +87,10 @@ export default function Header() {
               transition={{ duration: 0.5, delay: 0.1 }}
               className="hidden sm:flex flex-col items-end"
             >
-              <span className="text-sm font-bold text-slate-900">
+              <span className={`text-sm font-bold ${editorTheme === 'dark' ? "text-slate-100" : "text-slate-900"}`}>
                 {userName}
               </span>
-              <span className="text-xs font-medium text-blue-600/60 mt-0.5">
+              <span className={`text-xs font-medium ${editorTheme === 'dark' ? 'text-blue-400' : 'text-blue-600'} mt-0.5`}>
                 Restaurant Owner
               </span>
             </motion.div>

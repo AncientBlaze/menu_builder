@@ -1,4 +1,57 @@
 import { useMenuEditor } from "@/context/MenuEditorContext";
+import { CanvasNode } from "@/types/canvas";
+
+/* =====================
+   Types
+===================== */
+
+type GradientStop = {
+  color: string;
+  position: number; // 0–100
+};
+
+type Gradient = {
+  type: "linear" | "radial";
+  angle?: number;
+  stops: GradientStop[];
+};
+
+type Shadow = {
+  x: number;
+  y: number;
+  blur: number;
+  color: string;
+};
+
+type ShapeProps = {
+  fill?: string;
+  opacity?: number;
+  radius?: number;
+  kind?: "rect" | "circle" | "svg";
+
+  gradient?: Gradient;
+
+  borderWidth?: number;
+  borderColor?: string;
+  borderStyle?: "solid" | "dashed" | "dotted";
+
+  shadow?: Shadow;
+};
+
+type ImageProps = {
+  src?: string;
+};
+
+/* =====================
+   Utils
+===================== */
+
+const clamp = (v: number, min = 0, max = 100) =>
+  Math.min(max, Math.max(min, v));
+
+/* =====================
+   Inspector
+===================== */
 
 export function CanvasInspector() {
   const {
@@ -12,15 +65,90 @@ export function CanvasInspector() {
 
   const node = menu.canvas.nodes.find(
     (n) => n.id === selectedCanvasNodeId
-  );
+  ) as CanvasNode | undefined;
 
   if (!node) return null;
 
   const isShape = node.type === "shape";
   const isImage = node.type === "image";
 
+  const props = node.props as ShapeProps & ImageProps;
+  const isCircle = props.kind === "circle";
+
+  /* =====================
+     Gradient Helpers
+  ===================== */
+
+  const addGradientStop = () => {
+    if (!props.gradient) return;
+
+    const stops = [...props.gradient.stops];
+    const newPosition =
+      stops.length === 2
+        ? (stops[0].position + stops[1].position) / 2
+        : 50;
+
+    stops.push({
+      color: "#888888",
+      position: clamp(newPosition),
+    });
+
+    stops.sort((a, b) => a.position - b.position);
+
+    updateCanvasNode(node.id, {
+      props: {
+        ...props,
+        gradient: {
+          ...props.gradient,
+          stops,
+        },
+      },
+    });
+  };
+
+  const removeGradientStop = (index: number) => {
+    if (!props.gradient || props.gradient.stops.length <= 2) return;
+
+    const stops = props.gradient.stops.filter((_, i) => i !== index);
+
+    updateCanvasNode(node.id, {
+      props: {
+        ...props,
+        gradient: {
+          ...props.gradient,
+          stops,
+        },
+      },
+    });
+  };
+
+  const updateGradientStop = (
+    index: number,
+    updates: Partial<GradientStop>
+  ) => {
+    if (!props.gradient) return;
+
+    const stops = props.gradient.stops.map((stop, i) =>
+      i === index ? { ...stop, ...updates } : stop
+    );
+
+    updateCanvasNode(node.id, {
+      props: {
+        ...props,
+        gradient: {
+          ...props.gradient,
+          stops,
+        },
+      },
+    });
+  };
+
+  /* =====================
+     Render
+  ===================== */
+
   return (
-    <div className="space-y-4 text-sm">
+    <div className="space-y-5 text-sm">
       <h3 className="font-semibold text-slate-700 dark:text-slate-200">
         Canvas Inspector
       </h3>
@@ -34,10 +162,7 @@ export function CanvasInspector() {
             value={node.offset.x}
             onChange={(e) =>
               updateCanvasNode(node.id, {
-                offset: {
-                  ...node.offset,
-                  x: Number(e.target.value),
-                },
+                offset: { ...node.offset, x: Number(e.target.value) },
               })
             }
             className="input"
@@ -51,10 +176,7 @@ export function CanvasInspector() {
             value={node.offset.y}
             onChange={(e) =>
               updateCanvasNode(node.id, {
-                offset: {
-                  ...node.offset,
-                  y: Number(e.target.value),
-                },
+                offset: { ...node.offset, y: Number(e.target.value) },
               })
             }
             className="input"
@@ -108,155 +230,121 @@ export function CanvasInspector() {
         />
       </label>
 
-      {/* SHAPE CONTROLS */}
+      {/* =====================
+         SHAPE CONTROLS
+      ===================== */}
       {isShape && (
         <>
+          {/* FILL */}
           <label className="flex flex-col gap-1">
             Fill
             <input
               type="color"
-              value={node.props.fill ?? "#000000"}
+              value={props.fill ?? "#000000"}
               onChange={(e) =>
                 updateCanvasNode(node.id, {
-                  props: {
-                    ...node.props,
-                    fill: e.target.value,
-                  },
+                  props: { ...props, fill: e.target.value },
                 })
               }
             />
           </label>
 
-
-          {/* GRADIENT */}
+          {/* GRADIENT TOGGLE */}
           <label className="flex items-center gap-2">
             <input
               type="checkbox"
-              checked={!!node.props.gradient}
+              checked={!!props.gradient}
               onChange={(e) =>
                 updateCanvasNode(node.id, {
                   props: {
-                    ...node.props,
+                    ...props,
                     gradient: e.target.checked
                       ? {
-                        type: "linear",
-                        angle: 90,
-                        stops: [
-                          { color: "#ff0000", position: 0 },
-                          { color: "#0000ff", position: 100 },
-                        ],
-                      }
+                          type: "linear",
+                          angle: 90,
+                          stops: [
+                            { color: "#ff0000", position: 0 },
+                            { color: "#0000ff", position: 100 },
+                          ],
+                        }
                       : undefined,
                   },
                 })
               }
             />
-            Use Gradient
+            <span className="font-medium">Use Gradient</span>
           </label>
 
-          {node.props.gradient && (
-            <>
-              <label className="flex flex-col gap-1">
-                Gradient Type
-                <select
-                  value={node.props.gradient.type}
-                  onChange={(e) =>
-                    updateCanvasNode(node.id, {
-                      props: {
-                        ...node.props,
-                        gradient: {
-                          ...node.props.gradient,
-                          type: e.target.value,
-                        },
-                      },
-                    })
-                  }
-                  className="input"
-                >
-                  <option value="linear">Linear</option>
-                  <option value="radial">Radial</option>
-                </select>
-              </label>
-
-              {node.props.gradient.type === "linear" && (
-                <label className="flex flex-col gap-1">
-                  Angle
-                  <input
-                    type="range"
-                    min={0}
-                    max={360}
-                    value={node.props.gradient.angle ?? 90}
-                    onChange={(e) =>
-                      updateCanvasNode(node.id, {
-                        props: {
-                          ...node.props,
-                          gradient: {
-                            ...node.props.gradient,
-                            angle: Number(e.target.value),
-                          },
-                        },
-                      })
-                    }
-                  />
-                </label>
-              )}
+          {/* GRADIENT EDITOR */}
+          {props.gradient && (
+            <div className="space-y-4 rounded border p-3 bg-slate-50 dark:bg-slate-900">
+              <div
+                className="h-8 rounded border"
+                style={{
+                  background:
+                    props.gradient.type === "linear"
+                      ? `linear-gradient(${props.gradient.angle ?? 90}deg, ${props.gradient.stops
+                          .map((s) => `${s.color} ${s.position}%`)
+                          .join(", ")})`
+                      : `radial-gradient(circle, ${props.gradient.stops
+                          .map((s) => `${s.color} ${s.position}%`)
+                          .join(", ")})`,
+                }}
+              />
 
               <div className="space-y-2">
-                <div className="font-medium">Gradient Stops</div>
+                <div className="flex items-center justify-between">
+                  <div className="font-medium">Gradient Stops</div>
+                  <button
+                    onClick={addGradientStop}
+                    className="text-xs px-2 py-1 rounded border hover:bg-slate-100 dark:hover:bg-slate-800"
+                  >
+                    + Add Stop
+                  </button>
+                </div>
 
-                {node.props.gradient.stops.map((stop, i) => (
+                {props.gradient.stops.map((stop, i) => (
                   <div key={i} className="flex items-center gap-2">
                     <input
                       type="color"
                       value={stop.color}
-                      onChange={(e) => {
-                        const stops = [...node.props.gradient.stops];
-                        stops[i] = { ...stop, color: e.target.value };
-
-                        updateCanvasNode(node.id, {
-                          props: {
-                            ...node.props,
-                            gradient: {
-                              ...node.props.gradient,
-                              stops,
-                            },
-                          },
-                        });
-                      }}
+                      onChange={(e) =>
+                        updateGradientStop(i, { color: e.target.value })
+                      }
                     />
 
                     <input
-                      type="number"
+                      type="range"
                       min={0}
                       max={100}
                       value={stop.position}
-                      onChange={(e) => {
-                        const stops = [...node.props.gradient.stops];
-                        stops[i] = {
-                          ...stop,
-                          position: Number(e.target.value),
-                        };
-
-                        updateCanvasNode(node.id, {
-                          props: {
-                            ...node.props,
-                            gradient: {
-                              ...node.props.gradient,
-                              stops,
-                            },
-                          },
-                        });
-                      }}
-                      className="w-16"
+                      onChange={(e) =>
+                        updateGradientStop(i, {
+                          position: clamp(Number(e.target.value)),
+                        })
+                      }
+                      className="flex-1"
                     />
+
+                    <span className="w-12 text-xs text-right">
+                      {stop.position}%
+                    </span>
+
+                    {props.gradient!.stops.length > 2 && (
+                      <button
+                        onClick={() => removeGradientStop(i)}
+                        className="text-red-600 text-xs"
+                      >
+                        ✕
+                      </button>
+                    )}
                   </div>
                 ))}
               </div>
-            </>
+            </div>
           )}
 
-
-
+          {/* OPACITY */}
           <label className="flex flex-col gap-1">
             Opacity
             <input
@@ -264,30 +352,24 @@ export function CanvasInspector() {
               min={0}
               max={1}
               step={0.01}
-              value={node.props.opacity ?? 1}
+              value={props.opacity ?? 1}
               onChange={(e) =>
                 updateCanvasNode(node.id, {
-                  props: {
-                    ...node.props,
-                    opacity: Number(e.target.value),
-                  },
+                  props: { ...props, opacity: Number(e.target.value) },
                 })
               }
             />
           </label>
+
           {/* BORDER */}
           <label className="flex flex-col gap-1">
             Border Width
             <input
               type="number"
-              min={0}
-              value={node.props.borderWidth ?? 0}
+              value={props.borderWidth ?? 0}
               onChange={(e) =>
                 updateCanvasNode(node.id, {
-                  props: {
-                    ...node.props,
-                    borderWidth: Number(e.target.value),
-                  },
+                  props: { ...props, borderWidth: Number(e.target.value) },
                 })
               }
               className="input"
@@ -298,13 +380,10 @@ export function CanvasInspector() {
             Border Color
             <input
               type="color"
-              value={node.props.borderColor ?? "#000000"}
+              value={props.borderColor ?? "#000000"}
               onChange={(e) =>
                 updateCanvasNode(node.id, {
-                  props: {
-                    ...node.props,
-                    borderColor: e.target.value,
-                  },
+                  props: { ...props, borderColor: e.target.value },
                 })
               }
             />
@@ -313,12 +392,15 @@ export function CanvasInspector() {
           <label className="flex flex-col gap-1">
             Border Style
             <select
-              value={node.props.borderStyle ?? "solid"}
+              value={props.borderStyle ?? "solid"}
               onChange={(e) =>
                 updateCanvasNode(node.id, {
                   props: {
-                    ...node.props,
-                    borderStyle: e.target.value,
+                    ...props,
+                    borderStyle: e.target.value as
+                      | "solid"
+                      | "dashed"
+                      | "dotted",
                   },
                 })
               }
@@ -330,125 +412,36 @@ export function CanvasInspector() {
             </select>
           </label>
 
-          {/* CORNER RADIUS */}
-          <label className="flex flex-col gap-1">
-            Corner Radius
-            <input
-              type="range"
-              min={0}
-              max={Math.min(node.width, node.height) / 2}
-              value={node.props.radius ?? 0}
-              onChange={(e) =>
-                updateCanvasNode(node.id, {
-                  props: {
-                    ...node.props,
-                    radius: Number(e.target.value),
-                  },
-                })
-              }
-            />
-          </label>
-          {/* SHADOW */}
-          <div className="space-y-2">
-            <div className="font-medium">Shadow</div>
-
+          {/* RADIUS — hidden for circles */}
+          {!isCircle && (
             <label className="flex flex-col gap-1">
-              X Offset
+              Corner Radius
               <input
-                type="number"
-                value={node.props.shadow?.x ?? 0}
-                onChange={(e) =>
-                  updateCanvasNode(node.id, {
-                    props: {
-                      ...node.props,
-                      shadow: {
-                        ...(node.props.shadow ?? { y: 0, blur: 10, color: "#00000055" }),
-                        x: Number(e.target.value),
-                      },
-                    },
-                  })
-                }
-                className="input"
-              />
-            </label>
-
-            <label className="flex flex-col gap-1">
-              Y Offset
-              <input
-                type="number"
-                value={node.props.shadow?.y ?? 0}
-                onChange={(e) =>
-                  updateCanvasNode(node.id, {
-                    props: {
-                      ...node.props,
-                      shadow: {
-                        ...(node.props.shadow ?? { x: 0, blur: 10, color: "#00000055" }),
-                        y: Number(e.target.value),
-                      },
-                    },
-                  })
-                }
-                className="input"
-              />
-            </label>
-
-            <label className="flex flex-col gap-1">
-              Blur
-              <input
-                type="number"
+                type="range"
                 min={0}
-                value={node.props.shadow?.blur ?? 0}
+                max={Math.min(node.width, node.height) / 2}
+                value={props.radius ?? 0}
                 onChange={(e) =>
                   updateCanvasNode(node.id, {
-                    props: {
-                      ...node.props,
-                      shadow: {
-                        ...(node.props.shadow ?? { x: 0, y: 0, color: "#00000055" }),
-                        blur: Number(e.target.value),
-                      },
-                    },
-                  })
-                }
-                className="input"
-              />
-            </label>
-
-            <label className="flex flex-col gap-1">
-              Shadow Color
-              <input
-                type="color"
-                value={node.props.shadow?.color ?? "#000000"}
-                onChange={(e) =>
-                  updateCanvasNode(node.id, {
-                    props: {
-                      ...node.props,
-                      shadow: {
-                        ...(node.props.shadow ?? { x: 0, y: 0, blur: 10 }),
-                        color: e.target.value,
-                      },
-                    },
+                    props: { ...props, radius: Number(e.target.value) },
                   })
                 }
               />
             </label>
-          </div>
-
+          )}
         </>
       )}
 
-      {/* IMAGE CONTROLS */}
+      {/* IMAGE */}
       {isImage && (
         <label className="flex flex-col gap-1">
           Image URL
           <input
             type="text"
-            value={node.props.src ?? ""}
+            value={props.src ?? ""}
             onChange={(e) =>
               updateCanvasNode(node.id, {
-                props: {
-                  ...node.props,
-                  src: e.target.value,
-                },
+                props: { ...props, src: e.target.value },
               })
             }
             className="input"
@@ -463,9 +456,7 @@ export function CanvasInspector() {
             type="checkbox"
             checked={node.locked ?? false}
             onChange={(e) =>
-              updateCanvasNode(node.id, {
-                locked: e.target.checked,
-              })
+              updateCanvasNode(node.id, { locked: e.target.checked })
             }
           />
           Locked
@@ -476,9 +467,7 @@ export function CanvasInspector() {
             type="checkbox"
             checked={node.visible ?? true}
             onChange={(e) =>
-              updateCanvasNode(node.id, {
-                visible: e.target.checked,
-              })
+              updateCanvasNode(node.id, { visible: e.target.checked })
             }
           />
           Visible

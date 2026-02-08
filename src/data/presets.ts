@@ -16,7 +16,7 @@ export const PRESETS: MenuPreset[] = [
       },
       theme: {
         theme: "vintage",
-        fontFamily: "serif",
+        fontFamily: "Archivo",
         accentColor: "#7a5c3e",
 
         layout: "single-column",
@@ -66,6 +66,9 @@ export const PRESETS: MenuPreset[] = [
           ],
         },
       ],
+      canvas: {
+        nodes: []
+      }
     },
   },
 
@@ -84,7 +87,7 @@ export const PRESETS: MenuPreset[] = [
       },
       theme: {
         theme: "elegant",
-        fontFamily: "serif",
+        fontFamily: "Crimson Pro",
         accentColor: "#b38b59",
 
         layout: "single-column",
@@ -134,6 +137,9 @@ export const PRESETS: MenuPreset[] = [
           ],
         },
       ],
+      canvas: {
+        nodes: []
+      }
     },
   },
 
@@ -152,7 +158,7 @@ export const PRESETS: MenuPreset[] = [
       },
       theme: {
         theme: "bold",
-        fontFamily: "sans",
+        fontFamily: "Lora",
         accentColor: "#ff4d00",
 
         layout: "single-column",
@@ -202,6 +208,9 @@ export const PRESETS: MenuPreset[] = [
           ],
         },
       ],
+      canvas: {
+        nodes: []
+      }
     },
   },
 
@@ -220,7 +229,7 @@ export const PRESETS: MenuPreset[] = [
       },
       theme: {
         theme: "light",
-        fontFamily: "sans",
+        fontFamily: "Merriweather",
         accentColor: "#4a7c59",
 
         layout: "single-column",
@@ -250,6 +259,9 @@ export const PRESETS: MenuPreset[] = [
           ],
         },
       ],
+      canvas: {
+        nodes: []
+      }
     },
   },
 ];
